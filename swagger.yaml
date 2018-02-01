@@ -97,6 +97,25 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Error'
+  /stock/{productIdentifier}:
+    get:
+      description: Returns stock situation for the indicated product (identifier)
+      operationId: retrieve stock status for product
+      parameters:
+        - name: productIdentifier
+          in: path
+          description: Identifier of the product to retrieve the current stock situation for
+          required: true
+          type: string
+      responses:
+        200:
+          description: stock status
+          schema:
+            type: string
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
   /health:
     get:
       description: Reports on the health of the Logistics Service 
@@ -133,9 +152,42 @@ definitions:
             format: int32
   NewShipping:
     properties:
-      name:
+      orderIdentifier:
         type: string
-      tag:
+      nameAddressee:
+        type: string
+        description: "Human readable label of the person to whom the shipping is to be sent. For example: Mr. Joseph P. Miller, Lucy Diamond"
+      destinatio:
+          $ref: '#/definitions/Destination'
+      shippingMethod:
+        type: string
+        enum: [premium, economy]
+        description: premium to have items shipped as quickly as possible, economy to do cheapest shipping available
+      desiredDeliveryData:
+        type: string
+        format: date
+        description: "for example: deliver on birthday next month, after when I return from holiday, when I am in that hotel"
+      giftWrapping:
+        type: boolean
+      personalMessage:
+        type: string
+      items:
+        type: array
+        items: 
+          $ref: '#/definitions/ShippingItem'
+    required:
+      - name
+  Destination:
+    properties:
+      street:
+        type: string
+      houseNumber:
+        type: string
+      postalCode:
+        type: string
+      city:
+        type: string
+      country:
         type: string
       items:
         type: array

@@ -22,8 +22,8 @@ produces:
 paths:
   /shipping:
     post:
-      description: Submits a new shipping to execute by the Logistics service.  
-      operationId: submit Shipping
+      description: Submits a new shipping to be executed by the Logistics service.  
+      operationId: submit shipping
       parameters:
         - name: shipping
           in: body
@@ -36,6 +36,26 @@ paths:
           description: shipping response
           schema:
             $ref: '#/definitions/Shipping'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /shipping/validate:
+    post:
+      description: Validate a shipping to find out if it is acceptable - and if not, what the issues are with it (such as the combination of items and the destination country or items that are not currently in stock). Note this operation does not have any side effects
+      operationId: validate shipping
+      parameters:
+        - name: shipping
+          in: body
+          description: Shipping to validate
+          required: true
+          schema:
+            $ref: '#/definitions/NewShipping'
+      responses:
+        200:
+          description: shipping validation response
+          schema:
+            $ref: '#/definitions/ShippingValidation'
         default:
           description: unexpected error
           schema:
@@ -73,6 +93,8 @@ paths:
       responses:
         204:
           description: Shipping deleted
+        404:
+          description: Shipping to be deleted was not found. 
         default:
           description: unexpected error
           schema:
@@ -92,7 +114,30 @@ paths:
         200:
           description: shipping status
           schema:
+            $ref: '#/definitions/ShippingStatus'
+        default:
+          description: unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /shipping/{shippingId}/cancel:
+    post:
+      description: Cancel a shipping that was placed earlier on; cancel means prevent hand over to parcel delivery partner; if that has already happened, cancel has no effect. 
+      operationId: retrieve shipping status by shipping id
+      parameters:
+        - name: shippingId
+          in: path
+          description: Identifier of the shipping to cancel
+          required: true
+          type: integer
+          format: int64
+      responses:
+        201:
+          description: shipping was successfully canceled (also returned if the shpping had already been canceled before this request)
+        200:
+          description: Shipping cancellation result 
+          schema:
             type: string
+            enum: ["shippingNotFound", "shippingCannotBeCancelled"]
         default:
           description: unexpected error
           schema:
@@ -139,6 +184,12 @@ definitions:
           id:
             type: integer
             format: int64
+          shippingStatus:
+            $ref: '#/definitions/ShippingStatus'
+          parcels:
+            type: array
+            items: 
+              $ref: '#/definitions/Parcel'
   ShippingItem:
     allOf:
       - required:
@@ -157,11 +208,11 @@ definitions:
       nameAddressee:
         type: string
         description: "Human readable label of the person to whom the shipping is to be sent. For example: Mr. Joseph P. Miller, Lucy Diamond"
-      destinatio:
+      destination:
           $ref: '#/definitions/Destination'
       shippingMethod:
         type: string
-        enum: [premium, economy]
+        enum: ["premium", "economy"]
         description: premium to have items shipped as quickly as possible, economy to do cheapest shipping available
       desiredDeliveryData:
         type: string
@@ -176,7 +227,72 @@ definitions:
         items: 
           $ref: '#/definitions/ShippingItem'
     required:
+      - nameAddressee
+      - destination
+      - items
+  Parcel:
+    description: A shipping can be handed over to the parcel delivery service in one or more parcels. each parcel is separately delivered and can be tracked & traced
+    properties:
+      parcelDeliveryService:
+        type: string
+        description: identifier of the parcel delivery service 
+      trackAndTraceIdentifier:
+        type: string
+        description: identifier assigned by the parcel delivery service to identify the parcel
+      estimatedDeliveryData:
+        type: string
+        format: date
+        description: "the estimated date & time of delivery of the parcel at the destination"
+      parcelLogItems:
+        type: array
+        items: 
+          $ref: '#/definitions/ParcelLogItem'
+    required:
       - name
+
+  ParcelLogItem:
+    properties:
+      location:
+        type: string
+        description: "current whereabouts of the parcel TODO - perhaps change to a geo coordinates data type"
+      parcelStatus:
+        type: string
+        description: "indication of the status of the parcel"
+        "enum": [
+                  "inDepot",
+                  "enRoute",
+                  "delivered",
+                  "lost"
+                ]
+      estimatedDeliveryData:
+        type: string
+        format: date
+        description: "the estimated date & time of delivery of the parcel at the destination"
+
+  ShippingValidation:
+    properties:
+      status:
+        type: string
+        description: "OK or NOK"
+      ValidationFindings:
+        type: array
+        items: 
+          $ref: '#/definitions/ValidationFinding'
+  ValidationFinding:
+    properties:
+      findingType:
+        type: string
+        description: "indication of the type of finding"
+        "enum": [
+                  "invalidDestination",
+                  "outOfStockItem"
+                ]
+      offendingItem:
+        $ref: '#/definitions/ShippingItem'
+  ShippingStatus:
+    type: string
+    enum: ["new", "picking","handedOverToParcelDelivery","delivered","lost","canceled"]
+    description: indication of the current status of the shipping
   Destination:
     properties:
       street:

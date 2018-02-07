@@ -1,10 +1,11 @@
 ## The Logistics Microservice
 
-You can use the [editor on GitHub](https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 The repo for the Logistics Microservice for [the Soaring through the Cloud - The Sequel](https://github.com/lucasjellema/soaring-through-the-cloud-native-sequel)
 
 Here is the visual overview of the Logistics MS - its APIs, Events, User Interfaces and (high level) internals:
 ![Logistics Microservice Overview ](img/logistics-design.png)
+
+The design of the API is on [Apiary](https://logisticsmicroservice.docs.apiary.io/#)
 
 In order to test the Logistics MS on its own, we need to create a harness:
 * a mock implementation of the 3rd party parcel handler service

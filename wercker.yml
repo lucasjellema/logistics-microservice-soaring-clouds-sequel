@@ -27,16 +27,16 @@ deploy-to-oke:
         name: "Visualise Kubernetes config"
         code: cat kubernetes-deployment.yml
     
-#    - kubectl:
-#        name: delete namespace
-##        server: $KUBERNETES_MASTER
-#        token: $KUBERNETES_TOKEN
-##        insecure-skip-tls-verify: true
-#        command: delete namespace $KUBERNETES_NAMESPACE --ignore-not-found=true
+    - kubectl:
+        name: delete namespace
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: delete namespace $KUBERNETES_NAMESPACE --ignore-not-found=true
         
- #   - script:
- #       name: wait to delete namespace
- #       code: sleep 30
+    - script:
+        name: wait to delete namespace
+        code: sleep 30
         
     - kubectl:
         name: create namespace    
@@ -60,7 +60,7 @@ deploy-to-oke:
         command: create secret tls tls-secret --key $WERCKER_ROOT/tls.key --cert $WERCKER_ROOT/tls.crt --namespace=$KUBERNETES_NAMESPACE
         
     - kubectl:
-        name: create deployment
+        name: create or replace deployment
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
@@ -76,6 +76,27 @@ deploy-to-oke:
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
         command: create -f $WERCKER_ROOT/ingress.yml --namespace=$KUBERNETES_NAMESPACE
+
+# redeployment after the code has changed; no changes in kubernetes configuration 
+redeploy-to-oke:
+  box:
+        id: alpine
+        cmd: /bin/sh
+  steps:
+    - bash-template
+    
+    - script:
+        name: "Visualise Kubernetes config"
+        code: cat kubernetes-deployment.yml
+    
+        
+    - kubectl:
+        name: replace deployment
+        server: $KUBERNETES_MASTER
+        token: $KUBERNETES_TOKEN
+        insecure-skip-tls-verify: true
+        command: edit -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$KUBERNETES_NAMESPACE
+
 
 functional-test:
   steps:

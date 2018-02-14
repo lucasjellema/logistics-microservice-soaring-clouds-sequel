@@ -32,13 +32,13 @@
 				"header": [],
 				"body": {},
 				"url": {
-					"raw": "{{logistics-ms-api-endpoint}}/shipping/3456",
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/fec97664-5c7d-faa6-d839-6ee0ffd5a11e",
 					"host": [
 						"{{logistics-ms-api-endpoint}}"
 					],
 					"path": [
 						"shipping",
-						"3456"
+						"fec97664-5c7d-faa6-d839-6ee0ffd5a11e"
 					]
 				},
 				"description": ""
@@ -57,7 +57,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"orderIdentifier\": \"91839\",\n    \"nameAddressee\": \"Mrs. K. Jones\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"7623782376\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"817AAXX918\",\n            \"itemCount\": 1\n        }\n    ]\n}"
+					"raw": "{\n    \"orderIdentifier\": \"91839\",\n    \"nameAddressee\": \"Mrs. K. Spitz\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"7623782376\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"817AAXX918\",\n            \"itemCount\": 1\n        }\n    ]\n}"
 				},
 				"url": {
 					"raw": "{{logistics-ms-api-endpoint}}/shipping",
@@ -107,13 +107,13 @@
 				"header": [],
 				"body": {},
 				"url": {
-					"raw": "{{logistics-ms-api-endpoint}}/shipping/3456/status",
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/fec97664-5c7d-faa6-d839-6ee0ffd5a11e/status",
 					"host": [
 						"{{logistics-ms-api-endpoint}}"
 					],
 					"path": [
 						"shipping",
-						"3456",
+						"fec97664-5c7d-faa6-d839-6ee0ffd5a11e",
 						"status"
 					]
 				},
@@ -179,6 +179,216 @@
 					]
 				},
 				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: check health of server",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/_cat/health",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"_cat",
+						"health"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: create Shippings index",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"settings\": {\n    \"analysis\": {\n      \"analyzer\": {\n        \"std_english\": { \n          \"type\":      \"standard\",\n          \"stopwords\": \"_english_\"\n        }\n      }\n    }\n   }\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/shipping",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"shipping"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: create mapping for Shippings index",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"properties\": {\r\n        \"desiredDeliveryDate\": {\r\n            \"type\": \"date\",\r\n            \"format\":\"yyyy-MM-dd\"\r\n        },\r\n        \"destination\": {\r\n            \"properties\": {\r\n                \"city\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                },\r\n                \"country\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                },\r\n                \"houseNumber\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                },\r\n                \"postalCode\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                },\r\n                \"street\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        },\r\n        \"giftWrapping\": {\r\n            \"type\": \"boolean\"\r\n        },\r\n        \"id\": {\r\n            \"type\": \"text\",\r\n            \"fields\": {\r\n                \"keyword\": {\r\n                    \"type\": \"keyword\",\r\n                    \"ignore_above\": 256\r\n                }\r\n            }\r\n        },\r\n        \"items\": {\r\n            \"properties\": {\r\n                \"itemCount\": {\r\n                    \"type\": \"long\"\r\n                },\r\n                \"productIdentifier\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        },\r\n        \"nameAddressee\": {\r\n            \"type\": \"text\",\r\n            \"fields\": {\r\n                \"keyword\": {\r\n                    \"type\": \"keyword\",\r\n                    \"ignore_above\": 256\r\n                }\r\n            }\r\n        },\r\n        \"orderIdentifier\": {\r\n            \"type\": \"text\",\r\n            \"fields\": {\r\n                \"keyword\": {\r\n                    \"type\": \"keyword\",\r\n                    \"ignore_above\": 256\r\n                }\r\n            }\r\n        },\r\n        \"parcels\": {\r\n            \"properties\": {\r\n                \"estimatedDeliveryData\": {\r\n                    \"type\": \"date\"\r\n                },\r\n                \"parcelDeliveryService\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                },\r\n                \"parcelLogItems\": {\r\n                    \"properties\": {\r\n                        \"estimatedDeliveryDate\": {\r\n                            \"type\": \"date\"\r\n                        },\r\n                        \"location\": {\r\n                            \"type\": \"text\",\r\n                            \"fields\": {\r\n                                \"keyword\": {\r\n                                    \"type\": \"keyword\",\r\n                                    \"ignore_above\": 256\r\n                                }\r\n                            }\r\n                        },\r\n                        \"parcelStatus\": {\r\n                            \"type\": \"text\",\r\n                            \"fields\": {\r\n                                \"keyword\": {\r\n                                    \"type\": \"keyword\",\r\n                                    \"ignore_above\": 256\r\n                                }\r\n                            }\r\n                        }\r\n                    }\r\n                },\r\n                \"trackAndTraceIdentifier\": {\r\n                    \"type\": \"text\",\r\n                    \"fields\": {\r\n                        \"keyword\": {\r\n                            \"type\": \"keyword\",\r\n                            \"ignore_above\": 256\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        },\r\n        \"personalMessage\": {\r\n            \"type\": \"text\",\r\n            \"fields\": {\r\n                \"keyword\": {\r\n                    \"type\": \"keyword\",\r\n                    \"ignore_above\": 256\r\n                }\r\n            }\r\n        },\r\n        \"shippingMethod\": {\r\n            \"type\": \"text\",\r\n            \"fields\": {\r\n                \"keyword\": {\r\n                    \"type\": \"keyword\",\r\n                    \"ignore_above\": 256\r\n                }\r\n            }\r\n        },\r\n        \"shippingStatus\": {\r\n            \"type\": \"text\",\r\n            \"fields\": {\r\n                \"keyword\": {\r\n                    \"type\": \"keyword\",\r\n                    \"ignore_above\": 256\r\n                }\r\n            }\r\n        },\r\n        \"submissionDate\": {\r\n            \"type\": \"date\",\r\n             \"format\":\"yyyy-MM-dd HH:mm:ss\"\r\n       }\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/shipping/_mapping/doc",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"shipping",
+						"_mapping",
+						"doc"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: put single shipping document",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"3456\",\n    \"orderIdentifier\": \"91839\",\n    \"submissionDate\": \"2018-02-14T14:12:09Z\",\n    \"shippingStatus\": \"picking\",\n    \"nameAddressee\": \"Mrs. K. Jones\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"7623782376\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"817AAXX918\",\n            \"itemCount\": 1\n        }\n    ],\n    \"parcels\": [\n        {\n            \"parcelDeliveryService\": \"UPS\",\n            \"trackAndTraceIdentifier\": \"71276236II-123\",\n            \"estimatedDeliveryData\": \"2018-03-21\",\n            \"parcelLogItems\": [\n                {\n                    \"location\": \"München\",\n                    \"parcelStatus\": \"inDepot\",\n                    \"estimatedDeliveryDate\": \"2018-02-21T17:32:28Z\"\n                }\n            ]\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/shipping/doc/_2",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"shipping",
+						"doc",
+						"_2"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Mapping definition for Shippings index",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"area\": {\n      \"acres\": \"49,057.36\",\n      \"square_km\": \"198.5\"\n    },\n    \"coordinates\": {\n      \"latitude\": 44.35,\n      \"longitude\": -68.21\n    },\n    \"date_established_readable\": \"February 26, 1919\",\n    \"date_established_unix\": -1604599200,\n    \"description\": \"Covering most of Mount Desert Island and other coastal islands, Acadia features the tallest mountain on the Atlantic coast of the United States, granite peaks, ocean shoreline, woodlands, and lakes. There are freshwater, estuary, forest, and intertidal habitats.\",\n    \"image\": {\n      \"url\": \"acadia.jpg\",\n      \"attribution\": \"PixelBay/@Skeeze\",\n      \"attribution_url\": \"https://pixabay.com/en/users/skeeze-272447/\"\n    },\n    \"nps_link\": \"https://www.nps.gov/acad/index.htm\",\n    \"states\": [\n      {\n        \"id\": \"state_maine\",\n        \"title\": \"Maine\"\n      }\n    ],\n    \"title\": \"Acadia\",\n    \"id\": \"park_acadia\",\n    \"visitors\": \"3,303,393\",\n    \"world_heritage_site\": false\n  }"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/shipping/_mapping?pretty",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"shipping",
+						"_mapping"
+					],
+					"query": [
+						{
+							"key": "pretty",
+							"value": "",
+							"equals": false
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Query for all shippings",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"query\": {\r\n        \"filtered\": {\r\n            \"query\": {\r\n                \"query_string\": {\r\n                    \"query\": \"drama\"\r\n                }\r\n            },\r\n            \"filter\": {\r\n                \"term\": { \"year\": 1962 }\r\n            }\r\n        }\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/shipping/_search",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"shipping",
+						"_search"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: delete Shippings index",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/parks",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"parks"
+					]
+				},
+				"description": "\t"
 			},
 			"response": []
 		}

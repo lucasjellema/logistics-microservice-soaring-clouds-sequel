@@ -25,6 +25,7 @@
   "homepage": "https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "elasticsearch": "^14.0.0"
   }
 }

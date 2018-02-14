@@ -32,7 +32,7 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: delete namespace $WERCKER_APPLICATION_OWNER_NAME --ignore-not-found=true
+        command: delete namespace $KUBERNETES_NAMESPACE --ignore-not-found=true
         
     - script:
         name: wait to delete namespace
@@ -43,7 +43,7 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: create namespace $WERCKER_APPLICATION_OWNER_NAME
+        command: create namespace $KUBERNETES_NAMESPACE
         
     - kubectl:
         name: create OCR secret
@@ -64,7 +64,7 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: create -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$WERCKER_APPLICATION_OWNER_NAME
+        command: create -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$KUBERNETES_NAMESPACE
 
     - script:
         name: "Visualise Ingress config"
@@ -75,7 +75,7 @@ deploy-to-oke:
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: create -f $WERCKER_ROOT/ingress.yml --namespace=$WERCKER_APPLICATION_OWNER_NAME
+        command: create -f $WERCKER_ROOT/ingress.yml --namespace=$KUBERNETES_NAMESPACE
 
 functional-test:
   steps:

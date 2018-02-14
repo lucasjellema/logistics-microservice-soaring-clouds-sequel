@@ -12,7 +12,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: /$WERCKER_APPLICATION_OWNER_NAME/app/
+      - path: /$KUBERNETES_NAMESPACE/app/
         backend:
           serviceName: rest-logisticsms-svc
           servicePort: 8088

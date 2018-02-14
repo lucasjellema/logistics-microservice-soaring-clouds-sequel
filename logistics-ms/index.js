@@ -6,14 +6,14 @@ var model = require("./model/model");
 var http = require('http');
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.0.2"
+var APP_VERSION = "0.0.3"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
 var app = express();
 var server = http.createServer(app);
 server.listen(PORT, function () {
-    console.log('Microservice' + APP_NAME + ' running, Express is listening... at ' + PORT + " for /health, /about and /shipping API calls");
+    console.log('Soaring through the Clouds - the Sequel Microservice' + APP_NAME + ' running, Express is listening... at ' + PORT + " for /health, /about and /shipping API calls");
 });
 
 app.use(bodyParser.urlencoded({ extended: true }));

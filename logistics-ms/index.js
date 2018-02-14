@@ -6,7 +6,7 @@ var model = require("./model/model");
 var http = require('http');
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.0.3"
+var APP_VERSION = "0.0.5"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -20,27 +20,27 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ type: '*/*' }));
 app.get('/about', function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write("<h3>About "+APP_NAME+", Version " + APP_VERSION + "</h3><br/>");
+    res.write("<h3>About " + APP_NAME + ", Version " + APP_VERSION + "</h3><br/>");
     res.write("Supported URLs:<br/>");
     res.write("/shipping (POST)<br/>");
-    res.write("/shipping/validate (POST)<br/>");
+    res.write("/shipping/validate (POST) - mock <br/>");
     res.write("/shipping/{shippingId} (GET)<br/>");
-    res.write("/shipping/{shippingId} (DELETE)<br/>");
+    res.write("/shipping/{shippingId} (DELETE) - mock<br/>");
     res.write("/shipping/{shippingId}/status (GET)<br/>");
-    res.write("/shipping/{shippingId}/cancel (POST)<br/>");
-    res.write("/stock/{productIdentifier} (GET)<br/>");
+    res.write("/shipping/{shippingId}/cancel (POST) - mock <br/>");
+    res.write("/stock/{productIdentifier} (GET) - mock <br/>");
     res.write("/health (GET)<br/>");
     res.write("NodeJS runtime version " + process.version + "<br/>");
     res.write("incoming headers" + JSON.stringify(req.headers) + "<br/>");
-    res.write("Environment variables: DEMO_GREETING: "+ process.env.DEMO_GREETING + "<br/>");
-    res.write("ELASTIC_CONNECTOR: "+ process.env.ELASTIC_CONNECTOR + "<br/>");
+    res.write("Environment variables: DEMO_GREETING: " + process.env.DEMO_GREETING + "<br/>");
+    res.write("ELASTIC_CONNECTOR: " + process.env.ELASTIC_CONNECTOR + "<br/>");
     res.end();
 });
 
 
 app.get('/shipping/:shippingId', function (req, res) {
     var shippingId = req.params['shippingId'];
-    var shipping = {
+ /*   var shipping = {
         "id": shippingId,
         "orderIdentifier": "91839",
         "shippingStatus": "picking",
@@ -70,20 +70,29 @@ app.get('/shipping/:shippingId', function (req, res) {
             , "estimatedDeliveryData": "2018-03-21", "parcelLogItems": [{ "location": "München", "parcelStatus": "inDepot", "estimatedDeliveryDate": "2018-02-21T17:32:28Z" }]
         }]
     };
-    res.setHeader('Content-Type', 'application/json');
-    res.send(shipping);
+    */
+    model.retrieveShipping(shippingId).then((result) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(result._source);
+    }).catch( function(e){
+        res.send(404);        
+    })
 });
 
 app.get('/shipping/:shippingId/status', function (req, res) {
     var shippingId = req.params['shippingId'];
-    var status = { "status": "picking" };
-    res.setHeader('Content-Type', 'application/json');
-    res.send(status);
+    model.retrieveShipping(shippingId).then((result) => {
+        res.setHeader('Content-Type', 'application/json');
+        var status = { "status": result._source.shippingStatus };
+        res.send(status);
+    }).catch( function(e){
+        res.send(404);        
+    })
 });
 
 app.get('/stock/:productIdentifier', function (req, res) {
     var productIdentifier = req.params['productIdentifier'];
-    var stockStatus = { "itemsInStock": Math.floor(Math.random()*2716)};
+    var stockStatus = { "itemsInStock": Math.floor(Math.random() * 2716) };
     res.setHeader('Content-Type', 'application/json');
     res.send(stockStatus);
 });
@@ -96,7 +105,7 @@ app.post('/shipping/:shippingId/cancel', function (req, res) {
         res.setHeader('Content-Type', 'application/json');
         res.status(400);
         res.send(status);
-    } else { res.send(202);}
+    } else { res.send(202); }
 });
 
 
@@ -104,7 +113,7 @@ app.delete('/shipping/:shippingId', function (req, res) {
     var shippingId = req.params['shippingId'];
     if (Math.floor(Math.random() + 0.5) == 1) {
         res.send(404);
-    } else { res.send(204);}
+    } else { res.send(204); }
 });
 
 app.post('/shipping', function (req, res) {
@@ -112,8 +121,13 @@ app.post('/shipping', function (req, res) {
     var shippingId = guid();
     shipping.shippingId = shippingId;
     shipping.shippingStatus = "new";
-    res.setHeader('Content-Type', 'application/json');
-    res.send(shipping);
+    var sd = new Date();
+    shipping.submissionDate = sd.getUTCFullYear() + '-' + (sd.getUTCMonth()+1) + '-' + sd.getUTCDate() + ' ' + sd.getUTCHours() + ':' + sd.getUTCMinutes() + ':' + sd.getSeconds() ;
+
+    model.saveShipping(shipping).then((result) => {
+        res.setHeader('Content-Type', 'application/json');
+        res.send(shipping);
+    })
 });
 
 app.post('/shipping/validate', function (req, res) {

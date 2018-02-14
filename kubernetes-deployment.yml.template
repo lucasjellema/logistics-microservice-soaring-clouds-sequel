@@ -27,6 +27,11 @@ spec:
         ports:
         - containerPort: 8096
           protocol: TCP
+        env:
+          - name: DEMO_GREETING
+            value: "Hello from the environment"
+          - name: ELASTIC_CONNECTOR
+            value: $ELASTIC_CONNECTOR_VARIABLE
       imagePullSecrets:
       - name: wrelease
       restartPolicy: Always

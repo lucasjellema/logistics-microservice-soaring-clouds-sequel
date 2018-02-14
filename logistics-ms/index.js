@@ -32,6 +32,8 @@ app.get('/about', function (req, res) {
     res.write("/health (GET)<br/>");
     res.write("NodeJS runtime version " + process.version + "<br/>");
     res.write("incoming headers" + JSON.stringify(req.headers) + "<br/>");
+    res.write("Environment variables: DEMO_GREETING: "+ process.env.DEMO_GREETING + "<br/>");
+    res.write("ELASTIC_CONNECTOR: "+ process.env.ELASTIC_CONNECTOR + "<br/>");
     res.end();
 });
 

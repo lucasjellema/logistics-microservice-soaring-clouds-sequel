@@ -6,7 +6,7 @@ var model = require("./model/model");
 var http = require('http');
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.0.1"
+var APP_VERSION = "0.0.2"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -20,7 +20,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ type: '*/*' }));
 app.get('/about', function (req, res) {
     res.writeHead(200, { 'Content-Type': 'text/html' });
-    res.write("<h3>About Logistics MS, Version " + APP_VERSION + "</h3><br/>");
+    res.write("<h3>About "+APP_NAME+", Version " + APP_VERSION + "</h3><br/>");
     res.write("Supported URLs:<br/>");
     res.write("/shipping (POST)<br/>");
     res.write("/shipping/validate (POST)<br/>");

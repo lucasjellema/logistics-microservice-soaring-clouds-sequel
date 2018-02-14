@@ -60,7 +60,7 @@ deploy-to-oke:
         command: create secret tls tls-secret --key $WERCKER_ROOT/tls.key --cert $WERCKER_ROOT/tls.crt --namespace=$KUBERNETES_NAMESPACE
         
     - kubectl:
-        name: create or replace deployment
+        name: create 
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
@@ -91,11 +91,11 @@ redeploy-to-oke:
     
         
     - kubectl:
-        name: replace deployment
+        name: create deployment
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: edit -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$KUBERNETES_NAMESPACE
+        command: apply -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$KUBERNETES_NAMESPACE
 
 
 functional-test:

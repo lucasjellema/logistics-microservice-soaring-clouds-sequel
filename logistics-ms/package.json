@@ -10,6 +10,15 @@
     "type": "git",
     "url": "git+https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel.git"
   },
+  "eslintConfig":{
+    "parserOptions": {
+      "ecmaVersion": 8 
+    },
+    "env": {
+      "node": true
+    },
+    "extends": "eslint:recommended"
+  },
   "keywords": [
     "logistics",
     "shipping",

@@ -1,0 +1,186 @@
+{
+	"info": {
+		"name": "Logistics-MS-API",
+		"_postman_id": "c069b817-eba8-e3f6-ace9-3df07d99a41a",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Logistics MS API",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/health",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Shipping Logistics MS API",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/3456",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"shipping",
+						"3456"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Post Shipping Logistics MS API",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderIdentifier\": \"91839\",\n    \"nameAddressee\": \"Mrs. K. Jones\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"7623782376\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"817AAXX918\",\n            \"itemCount\": 1\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/shipping",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"shipping"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Shipping Logistics MS API",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"orderIdentifier\": \"91839\",\n    \"nameAddressee\": \"Mrs. K. Jones\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"7623782376\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"817AAXX918\",\n            \"itemCount\": 1\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/validate",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"shipping",
+						"validate"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status Shipping Logistics MS API",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/3456/status",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"shipping",
+						"3456",
+						"status"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Cancel Shipping Logistics MS API",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/3456/cancel",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"shipping",
+						"3456",
+						"cancel"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Shipping Logistics MS API",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/shipping/3456",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"shipping",
+						"3456"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status Product Stock Logistics MS API",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/stock/819",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"stock",
+						"819"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

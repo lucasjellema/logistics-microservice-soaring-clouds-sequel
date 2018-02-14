@@ -1,0 +1,30 @@
+{
+  "name": "logistics-ms",
+  "version": "1.0.0",
+  "description": "Microservice for handling shippings and doing stock management.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel.git"
+  },
+  "keywords": [
+    "logistics",
+    "shipping",
+    "stock",
+    "management",
+    "warehousing"
+  ],
+  "author": "Lucas Jellema",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel/issues"
+  },
+  "homepage": "https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2"
+  }
+}

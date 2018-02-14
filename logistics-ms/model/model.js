@@ -1,0 +1,2 @@
+var logisticsModel = module.exports;
+

@@ -45,6 +45,10 @@ paths:
           description: shipping response
           schema:
             $ref: '#/definitions/Shipping'
+        400:
+          description: validation fault - shipping cannot be accepted
+          schema:
+            $ref: '#/definitions/ShippingValidation'
         default:
           description: unexpected error
           schema:
@@ -123,7 +127,7 @@ paths:
         200:
           description: shipping status
           schema:
-            $ref: '#/definitions/ShippingStatus'
+            $ref: '#/definitions/StatusOfShipping'
         default:
           description: unexpected error
           schema:
@@ -140,13 +144,12 @@ paths:
           type: integer
           format: int64
       responses:
-        201:
+        202:
           description: shipping was successfully canceled (also returned if the shpping had already been canceled before this request)
-        200:
+        400:
           description: Shipping cancellation result 
           schema:
-            type: string
-            enum: ["shippingNotFound", "shippingCannotBeCancelled"]
+            $ref: '#/definitions/CancellationResult'
         default:
           description: unexpected error
           schema:
@@ -165,7 +168,7 @@ paths:
         200:
           description: stock status
           schema:
-            type: string
+             $ref: '#/definitions/StockStatus'
         default:
           description: unexpected error
           schema:
@@ -223,7 +226,7 @@ definitions:
         type: string
         enum: ["premium", "economy"]
         description: premium to have items shipped as quickly as possible, economy to do cheapest shipping available
-      desiredDeliveryData:
+      desiredDeliveryDate:
         type: string
         format: date
         description: "for example: deliver on birthday next month, after when I return from holiday, when I am in that hotel"
@@ -273,9 +276,9 @@ definitions:
                   "delivered",
                   "lost"
                 ]
-      estimatedDeliveryData:
+      estimatedDeliveryDate:
         type: string
-        format: date
+        format: dateTime
         description: "the estimated date & time of delivery of the parcel at the destination"
 
   ShippingValidation:
@@ -283,7 +286,7 @@ definitions:
       status:
         type: string
         description: "OK or NOK"
-      ValidationFindings:
+      validationFindings:
         type: array
         items: 
           $ref: '#/definitions/ValidationFinding'
@@ -298,6 +301,16 @@ definitions:
                 ]
       offendingItem:
         $ref: '#/definitions/ShippingItem'
+  CancellationResult:        
+    properties:
+      cancellationStatus:
+        type: string
+        enum: ["shippingNotFound", "shippingCannotBeCancelled"]
+        
+  StatusOfShipping:
+    properties:
+      status: 
+        $ref: '#/definitions/ShippingStatus'
   ShippingStatus:
     type: string
     enum: ["new", "picking","handedOverToParcelDelivery","delivered","lost","canceled"]
@@ -319,12 +332,13 @@ definitions:
       country:
         type: string
         example: uk
-      items:
-        type: array
-        items: 
-          $ref: '#/definitions/ShippingItem'
     required:
       - name
+  StockStatus:
+    properties:
+      itemsInStock: 
+        type: integer
+        format: int64
   health:
     properties:
       status:

@@ -10,9 +10,9 @@
     "type": "git",
     "url": "git+https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel.git"
   },
-  "eslintConfig":{
+  "eslintConfig": {
     "parserOptions": {
-      "ecmaVersion": 8 
+      "ecmaVersion": 8
     },
     "env": {
       "node": true
@@ -34,7 +34,9 @@
   "homepage": "https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel#readme",
   "dependencies": {
     "body-parser": "^1.18.2",
+    "elasticsearch": "^14.0.0",
     "express": "^4.16.2",
-    "elasticsearch": "^14.0.0"
+    "kafka-node": "^2.2.0",
+    "nominatim-geocoder": "^0.1.4"
   }
 }

@@ -17,3 +17,7 @@ In order to test the Logistics MS on its own, we need to create a harness:
 
 The Logistics Microservice is one of several services in the WebShop company (yet to be named):
 ![Microservices Landscape](img/microservices-overview.png)
+
+The Logistics MS will publish events:
+
+topic: a516817-soaring-shipping-news  for events of type shipping-news-event

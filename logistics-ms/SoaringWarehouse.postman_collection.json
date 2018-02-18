@@ -1,0 +1,251 @@
+{
+	"info": {
+		"name": "SoaringWarehouse",
+		"_postman_id": "d1e79bee-053b-2b5a-d54a-3b327fb5c526",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Elastic: create warehouse index",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"settings\": {\n    \"analysis\": {\n      \"analyzer\": {\n        \"std_english\": { \n          \"type\":      \"standard\",\n          \"stopwords\": \"_english_\"\n        }\n      }\n    }\n   }\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: put single stock transaction document",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"productIdentifier\" :\"42371XX\"\n  , \"quantityChange\" : -2\n  ,\"category\":\"pick\"\n  , \"timestamp\" :\"2018-2-18T15:15:47\"\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/stocktransaction/_22",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"stocktransaction",
+						"_22"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Mapping definition for Warehouse Stocktransaction ",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"area\": {\n      \"acres\": \"49,057.36\",\n      \"square_km\": \"198.5\"\n    },\n    \"coordinates\": {\n      \"latitude\": 44.35,\n      \"longitude\": -68.21\n    },\n    \"date_established_readable\": \"February 26, 1919\",\n    \"date_established_unix\": -1604599200,\n    \"description\": \"Covering most of Mount Desert Island and other coastal islands, Acadia features the tallest mountain on the Atlantic coast of the United States, granite peaks, ocean shoreline, woodlands, and lakes. There are freshwater, estuary, forest, and intertidal habitats.\",\n    \"image\": {\n      \"url\": \"acadia.jpg\",\n      \"attribution\": \"PixelBay/@Skeeze\",\n      \"attribution_url\": \"https://pixabay.com/en/users/skeeze-272447/\"\n    },\n    \"nps_link\": \"https://www.nps.gov/acad/index.htm\",\n    \"states\": [\n      {\n        \"id\": \"state_maine\",\n        \"title\": \"Maine\"\n      }\n    ],\n    \"title\": \"Acadia\",\n    \"id\": \"park_acadia\",\n    \"visitors\": \"3,303,393\",\n    \"world_heritage_site\": false\n  }"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_mapping/stocktransaction?pretty",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"_mapping",
+						"stocktransaction"
+					],
+					"query": [
+						{
+							"key": "pretty",
+							"value": "",
+							"equals": false
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: create mapping for warehouse stocktransaction ",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n                \"properties\": {\n                    \"category\": {\n                        \"type\": \"keyword\"\n                    },\n                    \"productIdentifier\": {\n                        \"type\": \"keyword\"\n                    },\n                    \"quantityChange\": {\n                        \"type\": \"long\"\n                    },\n                    \"timestamp\": {\n            \"type\": \"date\",\n             \"format\":\"yyyy-MM-dd'T'HH:mm:ss\"\n                    }\n                }\n            }\n        "
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_mapping/stocktransaction",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"_mapping",
+						"stocktransaction"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: delete warehouse index",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Query Stock Status per product",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"size\": 0,\r\n     \"query\": {\r\n    \"terms\": {\r\n      \"productIdentifier\": [\"42371XX\",\"XCZ\"]\r\n    }\r\n  },\r\n    \"aggs\": {\r\n        \"by_product\": {\r\n            \"terms\": {\r\n                \"field\": \"productIdentifier\"\r\n            },\r\n            \"aggs\": {\r\n                \"stock_count\": {\r\n                    \"sum\": {\r\n                        \"field\": \"quantityChange\"\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_search",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"_search"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: bulk put set of ProductStockTransactions",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"create\" : {\"_id\" : \"6\" } }\r\n{\"productIdentifier\" :\"42371XX\", \"quantityChange\" : 20 ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-18T15:15:47\"}\r\n{ \"create\" : {\"_id\" : \"7\" } }\r\n{\"productIdentifier\" :\"42371XX\"  , \"quantityChange\" : -2  ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-19T15:15:47\"}\r\n{ \"create\" : {\"_id\" : \"8\" } }\r\n{\t\"productIdentifier\" :\"42371XX\"  , \"quantityChange\" : -12  ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-20T15:15:47\"}\r\n{ \"create\" : {\"_id\" : \"16\" } }\r\n{\"productIdentifier\" :\"AA123\", \"quantityChange\" : 10 ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-21T15:15:47\"}\r\n{ \"create\" : {\"_id\" : \"17\" } }\r\n{\"productIdentifier\" :\"AA123\"  , \"quantityChange\" : -9  ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-22T15:15:47\"}\r\n{ \"create\" : {\"_id\" : \"28\" } }\r\n{\t\"productIdentifier\" :\"XCZ\"  , \"quantityChange\" : 120  ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-12T15:15:47\"}\r\n{ \"create\" : {\"_id\" : \"29\" } }\r\n{\t\"productIdentifier\" :\"XCZ\"  , \"quantityChange\" : -90  ,\"category\":\"pick\"  , \"timestamp\" :\"2018-2-13T15:15:47\"}\r\n"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/stocktransaction/_bulk",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"stocktransaction",
+						"_bulk"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Query for all StockTransactions",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"query\": {\r\n        \"filtered\": {\r\n            \"query\": {\r\n                \"query_string\": {\r\n                    \"query\": \"drama\"\r\n                }\r\n            },\r\n            \"filter\": {\r\n                \"term\": { \"year\": 1962 }\r\n            }\r\n        }\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/shipping/_search",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"shipping",
+						"_search"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

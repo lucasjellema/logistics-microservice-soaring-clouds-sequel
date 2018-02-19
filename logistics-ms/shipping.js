@@ -102,7 +102,7 @@ shipping.registerAPIs = function (app) {
         shipping.auditTrail = [{
             "timestamp": util.getTimestampAsString()
             , "status": "new"
-            ,"comment": "creation of new shipping"
+            , "comment": "creation of new shipping"
         }]
 
         shipping.shippingCosts = calculateShippingCosts(shipping)
@@ -129,36 +129,53 @@ shipping.registerAPIs = function (app) {
 
     app.post('/shipping/validate', function (req, res) {
         var shipping = req.body;
-        var validation = {};
-        if (Math.floor(Math.random() + 0.5) == 1) {
-            var validation = {
-                "status": "NOK"
-                , "validationFindings": [{
-                    "findingType": "invalidDestination",
-                    "offendingItem": shipping.items[0]
-                }
-                ]
-            };
-        } else {
-            var validation = {
-                "status": "OK"
-                , "validationFindings": [
-                ]
-            };
+        validateShipping(shipping).then((validation) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.send(validation);
         }
-        res.setHeader('Content-Type', 'application/json');
-        res.send(validation);
+        )
     });
 
-function  calculateShippingCosts(shipping) {
-    var costs = 1.5;
-    shipping.items.forEach( function (item) {
-       costs = costs + (0.3 * item.itemCount)
-    })
-    if ('premium'==shipping.shippingMethod) {
-        costs = costs*1.34
+    var validateShipping = async function (shipping) {
+        var validation = {
+            "status": "OK"
+            , "validationFindings": []
+        };
+        var productIdentifiers = shipping.items.reduce(function (ids, item) {
+            ids.push(item.productIdentifier)
+            return ids
+        }
+            , [])
+        var stocks = await model.retrieveProductStock(productIdentifiers)
+        console.log(JSON.stringify(stocks))
+        shipping.items.forEach(function (item) {
+            if (!stocks[item.productIdentifier] || stocks[item.productIdentifier] < item.itemCount) {
+                validation.status = "NOK";
+                validation.validationFindings.push({
+                    "findingType": "outOfStockItem",
+                    "offendingItem": item
+                })
+            }
+        })
+
+        if (shipping.destination.country == 'be') {
+            validation.status = "NOK";
+            validation.validationFindings.push({
+                "findingType": "invalidDestination"
+            })
+        }
+        return validation;
     }
-    return costs;
-}
+
+    function calculateShippingCosts(shipping) {
+        var costs = 1.5;
+        shipping.items.forEach(function (item) {
+            costs = costs + (0.3 * item.itemCount)
+        })
+        if ('premium' == shipping.shippingMethod) {
+            costs = costs * 1.34
+        }
+        return costs;
+    }
 
 }

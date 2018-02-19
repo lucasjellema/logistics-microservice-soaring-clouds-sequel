@@ -3,7 +3,7 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.1"
+var APP_VERSION = "0.0.2"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -66,10 +66,19 @@ function addToAuditTrail(shipping, comment) {
 async function pickForShipping(shipping) {
     console.log("Pick for shipping " + shipping.shippingId)
     // do stuff, then update shipping
-    //TODO: run picking action - get all items from product stock
-    var result = await logisticsModel.retrieveProductStock(["42371XX","XCZ","XCSSSSZ"])
-    console.log(JSON.stringify(result))
-    
+    var result = await logisticsModel.retrieveProductStock(["42371XX", "XCZ", "XCSSSSZ"])
+
+    shipping.items.forEach(function (item) {
+        logisticsModel.saveProductStockTransaction(
+            {
+                "productIdentifier": item.productIdentifier
+                , "quantityChange": -1 * item.itemCount
+                , "category": "pick"
+                , "timestamp": util.getTimestampAsString
+            }
+        )
+    })
+
 
     // - set new status
     shipping.shippingStatus = "picked";
@@ -150,7 +159,7 @@ function handleByParcelDeliveryService(shipping) {
                             "parcelStatus": "lost"
                         }
                         shipping.parcels[0].parcelLogItems.push(parcelLogItem);
-                        shipping.shippingStatus ="lost";
+                        shipping.shippingStatus = "lost";
                         shipping.parcels[0].estimatedDeliveryDate = '';
                         shippingUpdated = true
                         break;
@@ -172,10 +181,10 @@ function handleByParcelDeliveryService(shipping) {
                             "parcelStatus": "delivered"
                         }
                         shipping.parcels[0].parcelLogItems.push(parcelLogItem);
-                        shipping.shippingStatus ="delivered";
+                        shipping.shippingStatus = "delivered";
                         shipping.parcels[0].estimatedDeliveryDate = util.getDateAsString();
                         shippingUpdated = true
-                                        }
+                }
             }// if < enRouteToNextRatio
             break;
         default:
@@ -196,8 +205,8 @@ function handleByParcelDeliveryService(shipping) {
 }//handleByParcelDeliveryService
 
 // schedule a job to run every X seconds with a variation of y
-var x = 124.0;
-var y = 25.0;
+var x = 126.0;
+var y = 17.0;
 function scheduleJob() {
     var delay = x * 1000 + (y * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runShippingJob
@@ -206,3 +215,52 @@ function scheduleJob() {
 
 
 scheduleJob();
+
+
+
+jobs.runWarehouseJob = async function () {
+    console.log("Run warehouse job" + new Date())
+    // loop over all products in the warehouse; 
+    // if product stock < 5, then replenish in X% of the cases with 10 + random * 200 items
+    // if product stock >= 5, then replenish in Y% of the cases with 10 + random * 100 items
+    var productStock = await logisticsModel.retrieveProductStock()
+    console.log(JSON.stringify(productStock))
+    for (var product in productStock) {
+        console.log("product" + product + " stock = " + productStock[product])
+        if (productStock[product] < 5) {
+            if (Math.random() < 0.3) {
+                var quantity = 10 + Math.floor(Math.random() * 200)
+                logisticsModel.saveProductStockTransaction(
+                    {
+                        "productIdentifier": product
+                        , "quantityChange": quantity
+                        , "category": "replenish"
+                        , "timestamp": util.getTimestampAsString()
+                    })
+            }
+        }
+    }//for
+
+    // logisticsModel.saveProductStockTransaction(
+    //     {
+    //         "productIdentifier": item.productIdentifier
+    //         , "quantityChange": -1 * item.itemCount
+    //         , "category": "pick"
+    //         , "timestamp": util.getTimestampAsString
+    //     }
+    // )
+    scheduleWarehouseJob();
+}
+
+
+// schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
+var warehouseJobPeriod = 250.0;
+var warehouseJobFluctuation = 20.0;
+function scheduleWarehouseJob() {
+    var delay = warehouseJobPeriod * 1000 + (warehouseJobFluctuation * (0.5 - Math.random()) * 1000);
+    setTimeout(jobs.runWarehouseJob
+        , delay);
+}
+
+
+scheduleWarehouseJob();

@@ -116,6 +116,26 @@ logisticsModel.retrieveOpenShippings = async function () {
     }
 }
 
+
+logisticsModel.saveProductStockTransaction = async function (stocktransaction) {
+    try {
+        var response = await client.index({
+            index: 'warehouse',
+            type: 'stocktransaction',
+            body: stocktransaction
+        }
+        );
+
+        console.log("Response: " + JSON.stringify(response));
+        return stocktransaction;
+    }
+    catch (e) {
+        console.error("Error in Elastic Search - create stocktransaction document :" + JSON.stringify(e))
+        throw e
+    }
+
+}
+
 //products is an array of strings with product identifiers: e.g. ["42371XX", "XCZ"]
 logisticsModel.retrieveProductStock = async function (products) {
     try {
@@ -124,11 +144,11 @@ logisticsModel.retrieveProductStock = async function (products) {
             type: 'stocktransaction',
             body: {
                 "size": 0,
-                "query": {
+                "query": products ? {
                     "terms": {
                         "productIdentifier": products
                     }
-                },
+                } : {},
                 "aggs": {
                     "by_product": {
                         "terms": {
@@ -147,9 +167,10 @@ logisticsModel.retrieveProductStock = async function (products) {
         }
         );
         var stock = {};
-        productStock.aggregations.by_product.buckets.forEach(function(bucket) {
+        productStock.aggregations.by_product.buckets.forEach(function (bucket) {
             stock[bucket.key] = bucket.stock_count.value;
-            console.log("Stock for "+bucket.key+" = "+bucket.stock_count.value)})
+            console.log("Stock for " + bucket.key + " = " + bucket.stock_count.value)
+        })
         return stock;
     }
     catch (e) {

@@ -39,6 +39,7 @@ logisticsModel.saveShipping = async function (shipping) {
 logisticsModel.updateShipping = async function (shipping) {
     try {
         var response = await client.update({
+            retryOnConflict:3,
             index: 'shipping',
             id: shipping.shippingId,
             type: 'doc',
@@ -50,7 +51,7 @@ logisticsModel.updateShipping = async function (shipping) {
         return shipping;
     }
     catch (e) {
-        console.error("Error in Elastic Search - index document " + shipping.shippingId + ":" + JSON.stringify(e))
+        console.error("Error in Elastic Search - update document " + shipping.shippingId + ":" + JSON.stringify(e))
     }
 
 }

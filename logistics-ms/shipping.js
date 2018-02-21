@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.2"
+var APP_VERSION = "0.0.4"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -95,6 +95,14 @@ shipping.registerAPIs = function (app) {
 
     app.post('/shipping', async function (req, res) {
         var shipping = req.body;
+        var validationResult = await validateShipping(shipping)
+        if (validationResult.status=="NOK") {
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400);
+            res.send(validationResult);
+            return;
+        }
+        // continue of validationresult == OK
         var shippingId = util.guid();
         shipping.shippingId = shippingId;
         shipping.shippingStatus = "new";
@@ -135,6 +143,8 @@ shipping.registerAPIs = function (app) {
         }
         )
     });
+// http://www.nationsonline.org/oneworld/country_code_list.htm
+    var supportedDestinations = ['nl','us','uk','de','po', 'pr','ni','ma','sg','ch','in'] 
 
     var validateShipping = async function (shipping) {
         var validation = {
@@ -158,12 +168,14 @@ shipping.registerAPIs = function (app) {
             }
         })
 
-        if (shipping.destination.country == 'be') {
+        if (!supportedDestinations.includes( shipping.destination.country)) {
             validation.status = "NOK";
             validation.validationFindings.push({
                 "findingType": "invalidDestination"
             })
         }
+        validation.shippingCosts = calculateShippingCosts(shipping)
+
         return validation;
     }
 

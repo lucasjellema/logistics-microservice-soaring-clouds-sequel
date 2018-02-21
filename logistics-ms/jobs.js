@@ -3,7 +3,7 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.5"
+var APP_VERSION = "0.0.6"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -35,7 +35,7 @@ jobs.runShippingJob = function () {
                         handOverShipping(hit._source)
                     } catch (e) { console.error("error in handover to parcel service " + JSON.stringify(e)) }
                 }
-                if ("handedOverToParcelDelivery" == hit._source.shippingStatus) {
+                if (["handedOverToParcelDelivery","enRoute","inDepot"].includes( hit._source.shippingStatus)) {
                     try {
                         handleByParcelDeliveryService(hit._source)
                     } catch (e) { console.error("error in handling by  parcel service " + JSON.stringify(e)) }

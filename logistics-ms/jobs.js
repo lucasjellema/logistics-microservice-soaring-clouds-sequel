@@ -3,7 +3,7 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.2"
+var APP_VERSION = "0.0.4"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -125,6 +125,9 @@ function handOverShipping(shipping) {
 
 var depotToRoutingRatio = 0.8;
 var enRouteToNextRatio = 0.6;
+
+var warehouseLocations = ['Singapore,sg', 'Amsterdam,nl', 'Frankfurt,de', 'New York,us', 'Buenos Aires,ar']
+
 function handleByParcelDeliveryService(shipping) {
     console.log("Handle by Parcel Delivery Service " + shipping.shippingId)
     // do stuff, create new parcelLogItem then update shipping with it; also update parcel level estimatedDeliveryDate
@@ -136,16 +139,17 @@ function handleByParcelDeliveryService(shipping) {
         case 'inDepot':
             console.log('Parcel is in depot, start to move it (in most cases)');
             if (Math.random() < depotToRoutingRatio) {
+                console.log('Parcel is now on its way');
                 var parcelLogItem = {
                     "location": "",
                     "parcelStatus": "enRoute",
+                    "parcelLogTimestamp": util.getTimestampAsString(),
                     "estimatedDeliveryDate": util.getDateAsString(new Date().addDays(2)),
                 }
                 shipping.parcels[0].parcelLogItems.push(parcelLogItem);
                 shipping.parcels[0].estimatedDeliveryDate = parcelLogItem.estimatedDeliveryDate;
                 shippingUpdated = true
             } // if < depotToRoutingRatio
-            shippingUpdated = true;
             break;
         case 'enRoute':
             console.log('Parcel is en route, start to either deliver it, move it into a another depot, lose it');
@@ -156,6 +160,7 @@ function handleByParcelDeliveryService(shipping) {
                         console.log('Lose Parcel');
                         var parcelLogItem = {
                             "location": "unknown",
+                            "parcelLogTimestamp": util.getTimestampAsString(),
                             "parcelStatus": "lost"
                         }
                         shipping.parcels[0].parcelLogItems.push(parcelLogItem);
@@ -166,18 +171,32 @@ function handleByParcelDeliveryService(shipping) {
                     case dice < 0.35:
                         console.log('Ship to another depot');
                         var parcelLogItem = {
-                            "location": "Singapore,sg",
+                            "location": warehouseLocations[Math.floor(Math.random() * warehouseLocations.length)],
                             "parcelStatus": "inDepot",
+                            "parcelLogTimestamp": util.getTimestampAsString(),
                             "estimatedDeliveryDate": util.getDateAsString(new Date().addDays(4)),
                         }
                         shipping.parcels[0].parcelLogItems.push(parcelLogItem);
                         shipping.parcels[0].estimatedDeliveryDate = parcelLogItem.estimatedDeliveryDate;
                         shippingUpdated = true
                         break;
+                    case dice < 0.95:
+                        console.log('deliver');
+                        var parcelLogItem = {
+                            "location": "customer",
+                            "parcelLogTimestamp": util.getTimestampAsString(),
+                            "parcelStatus": "delivered"
+                        }
+                        shipping.parcels[0].parcelLogItems.push(parcelLogItem);
+                        shipping.shippingStatus = "delivered";
+                        shipping.parcels[0].estimatedDeliveryDate = util.getDateAsString();
+                        shippingUpdated = true;
+                        break;
                     default:
                         console.log('deliver');
                         var parcelLogItem = {
                             "location": "customer",
+                            "parcelLogTimestamp": util.getTimestampAsString(),
                             "parcelStatus": "delivered"
                         }
                         shipping.parcels[0].parcelLogItems.push(parcelLogItem);
@@ -188,7 +207,7 @@ function handleByParcelDeliveryService(shipping) {
             }// if < enRouteToNextRatio
             break;
         default:
-            console.log('no action required, parcel status =  ' + currentLogItem.parcelStatus + '.');
+            console.log('no action required (says the die), parcel status remains at  ' + currentLogItem.parcelStatus + '.');
     }
 
     // - set new status, if parcel is delivered or lost
@@ -205,7 +224,7 @@ function handleByParcelDeliveryService(shipping) {
 }//handleByParcelDeliveryService
 
 // schedule a job to run every X seconds with a variation of y
-var x = 126.0;
+var x = 127.0;
 var y = 17.0;
 function scheduleJob() {
     var delay = x * 1000 + (y * (0.5 - Math.random()) * 1000);

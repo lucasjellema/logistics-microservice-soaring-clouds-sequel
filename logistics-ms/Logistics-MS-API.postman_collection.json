@@ -27,6 +27,26 @@
 			"response": []
 		},
 		{
+			"name": "Health EventMonitor MS API",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "{{logistics-ms-api-endpoint}}/health/",
+					"host": [
+						"{{logistics-ms-api-endpoint}}"
+					],
+					"path": [
+						"health",
+						""
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
 			"name": "Get Shipping Logistics MS API",
 			"request": {
 				"method": "GET",
@@ -58,7 +78,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"orderIdentifier\": \"9183933312\",\n    \"nameAddressee\": \"Herr Müller\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Hannover\"\n            \n\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-28\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"AA7623782376\",\n            \"itemCount\": 15\n        },\n        {\n            \"productIdentifier\": \"81547AAXX918\",\n            \"itemCount\": 1\n        }\n    ]\n}"
+					"raw": "{\n    \"orderIdentifier\": \"93434ddd1ssa1\",\n    \"nameAddressee\": \"Joop Visser\",\n    \"destination\": {\n        \"country\": \"nl\",\n        \"city\": \"den helder\"\n            \n\n    },\n    \"shippingMethod\": \"premium\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Enjoy this stuff.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"AA7623782376\",\n            \"itemCount\": 132\n        },\n        {\n            \"productIdentifier\": \"XCZ\",\n            \"itemCount\": 21\n        }\n    ]\n}"
 				},
 				"url": {
 					"raw": "{{logistics-ms-api-endpoint}}/shipping",
@@ -85,7 +105,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"orderIdentifier\": \"91839\",\n    \"nameAddressee\": \"Mrs. K. Jones\",\n    \"destination\": {\n        \"country\": \"de\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"7623782376\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"817AAXX918\",\n            \"itemCount\": 1\n        }\n    ]\n}"
+					"raw": "{\n    \"orderIdentifier\": \"91839\",\n    \"nameAddressee\": \"Mrs. K. Jones\",\n    \"destination\": {\n        \"country\": \"be\",\n        \"street\": \"Bahnhofgasse\",\n        \"houseNumber\": \"23a\",\n        \"postalCode\": \"50768\",\n        \"city\": \"Köln\"\n    },\n    \"shippingMethod\": \"premium\",\n    \"desiredDeliveryDate\": \"2018-03-21\",\n    \"giftWrapping\": false,\n    \"personalMessage\": \"Ich denke, Sie werden diese Bücher wirklich genießen.\",\n    \"items\": [\n        {\n            \"productIdentifier\": \"42371XX\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"XCZ\",\n            \"itemCount\": 1\n        },\n        {\n            \"productIdentifier\": \"AAA\",\n            \"itemCount\": 13\n        }\n    ]\n}"
 				},
 				"url": {
 					"raw": "{{logistics-ms-api-endpoint}}/shipping/validate",
@@ -419,6 +439,159 @@
 					]
 				},
 				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: create Product Details index",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"settings\": {\n    \"analysis\": {\n      \"analyzer\": {\n        \"std_english\": { \n          \"type\":      \"standard\",\n          \"stopwords\": \"_english_\"\n        }\n      }\n    }\n   }\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/products",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"products"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: put single product document",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"3456\",\n    \"name\": \"Zoethout, family pack\",\n    \"weight\": \"145\",\n    \"dimensions\": \"2x10x5\",\n    \"categories\": [\"food\",\"sugar\",\"halal\"]\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/products/doc/_3",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"products",
+						"doc",
+						"_3"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Mapping definition for Products index",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"area\": {\n      \"acres\": \"49,057.36\",\n      \"square_km\": \"198.5\"\n    },\n    \"coordinates\": {\n      \"latitude\": 44.35,\n      \"longitude\": -68.21\n    },\n    \"date_established_readable\": \"February 26, 1919\",\n    \"date_established_unix\": -1604599200,\n    \"description\": \"Covering most of Mount Desert Island and other coastal islands, Acadia features the tallest mountain on the Atlantic coast of the United States, granite peaks, ocean shoreline, woodlands, and lakes. There are freshwater, estuary, forest, and intertidal habitats.\",\n    \"image\": {\n      \"url\": \"acadia.jpg\",\n      \"attribution\": \"PixelBay/@Skeeze\",\n      \"attribution_url\": \"https://pixabay.com/en/users/skeeze-272447/\"\n    },\n    \"nps_link\": \"https://www.nps.gov/acad/index.htm\",\n    \"states\": [\n      {\n        \"id\": \"state_maine\",\n        \"title\": \"Maine\"\n      }\n    ],\n    \"title\": \"Acadia\",\n    \"id\": \"park_acadia\",\n    \"visitors\": \"3,303,393\",\n    \"world_heritage_site\": false\n  }"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/products/_mapping?pretty",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"products",
+						"_mapping"
+					],
+					"query": [
+						{
+							"key": "pretty",
+							"value": "",
+							"equals": false
+						}
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: create mapping for Products index",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"properties\": {\r\n                    \"categories\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"dimensions\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"id\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"name\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"weight\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        "
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/products/_mapping/doc",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"products",
+						"_mapping",
+						"doc"
+					]
+				},
+				"description": "\t"
+			},
+			"response": []
+		},
+		{
+			"name": "Elastic: search all products",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n   \"properties\": {\r\n                    \"categories\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"dimensions\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"id\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"name\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    },\r\n                    \"weight\": {\r\n                        \"type\": \"text\",\r\n                        \"fields\": {\r\n                            \"keyword\": {\r\n                                \"type\": \"keyword\",\r\n                                \"ignore_above\": 256\r\n                            }\r\n                        }\r\n                    }\r\n                }\r\n            }\r\n        "
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/products/_search",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"products",
+						"_search"
+					]
+				},
+				"description": "\t"
 			},
 			"response": []
 		}

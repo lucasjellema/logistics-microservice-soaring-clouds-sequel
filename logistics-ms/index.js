@@ -10,7 +10,7 @@ var stock = require("./stock.js");
 var jobs = require("./jobs.js");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.0.6"
+var APP_VERSION = "0.0.9"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);

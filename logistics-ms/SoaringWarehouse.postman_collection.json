@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "Elastic: create warehouse index",
+			"name": "Elastic:create warehouse index",
 			"request": {
 				"method": "PUT",
 				"header": [

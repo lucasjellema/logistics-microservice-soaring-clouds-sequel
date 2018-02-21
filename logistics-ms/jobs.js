@@ -3,7 +3,7 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.4"
+var APP_VERSION = "0.0.5"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -11,7 +11,7 @@ var jobs = module.exports;
 
 console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 
-var executionRatio = 0.6;
+var executionRatio = 0.7;
 
 jobs.runShippingJob = function () {
     console.log("Run shipping job" + new Date())
@@ -148,6 +148,7 @@ function handleByParcelDeliveryService(shipping) {
                 }
                 shipping.parcels[0].parcelLogItems.push(parcelLogItem);
                 shipping.parcels[0].estimatedDeliveryDate = parcelLogItem.estimatedDeliveryDate;
+                shipping.shippingStatus = "enRoute";
                 shippingUpdated = true
             } // if < depotToRoutingRatio
             break;
@@ -178,6 +179,7 @@ function handleByParcelDeliveryService(shipping) {
                         }
                         shipping.parcels[0].parcelLogItems.push(parcelLogItem);
                         shipping.parcels[0].estimatedDeliveryDate = parcelLogItem.estimatedDeliveryDate;
+                        shipping.shippingStatus = "inDepot";
                         shippingUpdated = true
                         break;
                     case dice < 0.95:

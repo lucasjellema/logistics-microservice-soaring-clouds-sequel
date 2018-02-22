@@ -20,15 +20,22 @@ stock.registerAPIs = function (app) {
         res.setHeader('Content-Type', 'application/json');
         res.send(stockStatus);
     });
-    
+
     app.get('/products', async function (req, res) {
         try {
-        var products= await model.retrieveProducts();
+            var productsResult = await model.retrieveProducts();
             res.setHeader('Content-Type', 'application/json');
-            console.log("Products "+JSON.stringify(products))
-            res.send(products.hits.hits);
-        } catch(e) {
+            console.log("Products " + JSON.stringify(productsResult))
+            // create an array of products - removing all Elasic Search specific properties
+            var products =
+                productsResult.hits.hits.reduce(function (products, item) {
+                    products.push(item._source)
+                    return products
+                }, [])
+            res.send(products);
+        } catch (e) {
             res.send(404);
-    }});
+        }
+    });
 }
 

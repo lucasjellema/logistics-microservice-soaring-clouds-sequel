@@ -21,6 +21,14 @@ stock.registerAPIs = function (app) {
         res.send(stockStatus);
     });
     
-
+    app.get('/products', async function (req, res) {
+        try {
+        var products= await model.retrieveProducts();
+            res.setHeader('Content-Type', 'application/json');
+            console.log("Products "+JSON.stringify(products))
+            res.send(products.hits.hits);
+        } catch(e) {
+            res.send(404);
+    }});
 }
 

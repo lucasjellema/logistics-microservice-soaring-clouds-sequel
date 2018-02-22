@@ -39,7 +39,7 @@ logisticsModel.saveShipping = async function (shipping) {
 logisticsModel.updateShipping = async function (shipping) {
     try {
         var response = await client.update({
-            retryOnConflict:3,
+            retryOnConflict: 3,
             index: 'shipping',
             id: shipping.shippingId,
             type: 'doc',
@@ -117,6 +117,36 @@ logisticsModel.retrieveOpenShippings = async function () {
     }
 }
 
+logisticsModel.cancelShipping = async function (shippingId) {
+    try {
+ 
+        var cancelResult = await client.update({
+            index: 'shipping',
+            type: 'doc',
+            id: shippingId,
+            body: {
+                "script": {
+                    "source": "if (ctx._source['shippingStatus']=='new') {ctx._source['shippingStatus'] = 'canceled'} else {ctx.op = 'none'}",
+                    "lang": "painless"
+                }
+            }
+        }
+        );
+        return cancelResult;
+    }
+    catch (e) {
+        if (e.status = 404) {
+            console.log("Shipping Document was not found")
+            return {};
+        }
+        else {
+            console.error("Error in Elastic Search - find openshippings " + ":" + JSON.stringify(e))
+        
+        
+        throw e;
+        }
+    }
+}
 
 logisticsModel.saveProductStockTransaction = async function (stocktransaction) {
     try {
@@ -178,4 +208,23 @@ logisticsModel.retrieveProductStock = async function (products) {
         console.error("Error in Elastic Search - find productStock " + ":" + JSON.stringify(e))
         throw e;
     }
+}
+
+
+//products is an array of strings with product identifiers: e.g. ["42371XX", "XCZ"]
+logisticsModel.retrieveProducts = async function (products) {
+    try {
+        var products = await client.search({
+            index: 'products',
+            type: 'doc',
+            body: {
+                "query": products ? {
+                    "terms": {
+                        "id": products
+                    }
+                } : {}
+            }
+        });
+        return products;
+    } catch (e) { }
 }

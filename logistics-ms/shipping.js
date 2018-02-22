@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.4"
+var APP_VERSION = "0.0.5"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -72,15 +72,27 @@ shipping.registerAPIs = function (app) {
         })
     });
 
-    app.post('/shipping/:shippingId/cancel', function (req, res) {
+    app.post('/shipping/:shippingId/cancel', async function (req, res) {
         var shippingId = req.params['shippingId'];
-        if (Math.floor(Math.random() + 0.5) == 1) {
+        var cancelResult = await model.cancelShipping(shippingId);
+        if (cancelResult && cancelResult.result == 'updated') {
+            res.send(202);
+            // publish shipping news: shipping canceled
+            var shippingSrc = await model.retrieveShipping(shippingId); 
+            var shipping = shippingSrc._source 
+            shipping.auditTrail.push({
+                "timestamp": util.getTimestampAsString()
+                , "status": shipping.shippingStatus
+                , "comment": "Shipping canceled"
+            })
+            eventBusPublisher.publishShippingEvent(shipping)
+            // TODO: update audit trail in stored shipping document too
+            console.log("Shipping Cancelled: "+shippingId)
+        } else {
             var status = { "cancellationStatus": "shippingCannotBeCancelled" };
             res.setHeader('Content-Type', 'application/json');
             res.status(400);
             res.send(status);
-        } else {
-            res.send(202);
         }
     });
 
@@ -96,7 +108,7 @@ shipping.registerAPIs = function (app) {
     app.post('/shipping', async function (req, res) {
         var shipping = req.body;
         var validationResult = await validateShipping(shipping)
-        if (validationResult.status=="NOK") {
+        if (validationResult.status == "NOK") {
             res.setHeader('Content-Type', 'application/json');
             res.status(400);
             res.send(validationResult);
@@ -143,8 +155,8 @@ shipping.registerAPIs = function (app) {
         }
         )
     });
-// http://www.nationsonline.org/oneworld/country_code_list.htm
-    var supportedDestinations = ['nl','us','uk','de','po', 'pr','ni','ma','sg','ch','in'] 
+    // http://www.nationsonline.org/oneworld/country_code_list.htm
+    var supportedDestinations = ['nl', 'us', 'uk', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in']
 
     var validateShipping = async function (shipping) {
         var validation = {
@@ -168,7 +180,7 @@ shipping.registerAPIs = function (app) {
             }
         })
 
-        if (!supportedDestinations.includes( shipping.destination.country)) {
+        if (!supportedDestinations.includes(shipping.destination.country)) {
             validation.status = "NOK";
             validation.validationFindings.push({
                 "findingType": "invalidDestination"

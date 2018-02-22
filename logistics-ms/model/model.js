@@ -228,3 +228,22 @@ logisticsModel.retrieveProducts = async function (products) {
         return products;
     } catch (e) { }
 }
+
+logisticsModel.saveProduct = async function (product) {
+    try {
+        var response = await client.index({
+            index: 'products',
+//            id: shipping.shippingId,
+            type: 'doc',
+            body: product
+        }
+        );
+
+        console.log("Response: " + JSON.stringify(response));
+        return product;
+    }
+    catch (e) {
+        console.error("Error in Elastic Search Save Product - index document " + product.id + ":" + JSON.stringify(e))
+    }
+
+}

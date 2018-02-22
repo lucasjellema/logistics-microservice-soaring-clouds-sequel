@@ -3,8 +3,8 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.1"
-var APP_NAME = "Stock"
+var APP_VERSION = "0.0.2"
+var APP_NAME = "Stock" 
 
 var stock = module.exports;
 
@@ -37,5 +37,18 @@ stock.registerAPIs = function (app) {
             res.send(404);
         }
     });
+
+    app.post('/products', async function (req, res) {
+        try {
+            var product = req.body;
+            var result = await model.saveProduct(product);
+                res.setHeader('Content-Type', 'application/json');
+                res.send(product);
+
+        } catch (e) {
+            res.send(404);
+        }
+    });//post product
+
 }
 

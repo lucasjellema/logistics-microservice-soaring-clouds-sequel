@@ -89,11 +89,6 @@ logisticsModel.retrieveOpenShippings = async function () {
                         "must_not": [
                             {
                                 "match_phrase": {
-                                    "shippingStatus": "lost"
-                                }
-                            },
-                            {
-                                "match_phrase": {
                                     "shippingStatus": "delivered"
                                 }
                             },

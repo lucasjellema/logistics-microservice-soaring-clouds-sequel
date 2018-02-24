@@ -3,7 +3,7 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.6"
+var APP_VERSION = "0.0.7"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -25,7 +25,7 @@ jobs.runShippingJob = function () {
         openShippings.forEach(function (hit) {
             // in executionRatio
             if (Math.random() < executionRatio) {
-                if ("new" == hit._source.shippingStatus) {
+                if (["lost","new"].includes( hit._source.shippingStatus)) {
                     try {
                         pickForShipping(hit._source)
                     } catch (e) { console.error("error in pick ing " + JSON.stringify(e)) }
@@ -74,7 +74,7 @@ async function pickForShipping(shipping) {
                 "productIdentifier": item.productIdentifier
                 , "quantityChange": -1 * item.itemCount
                 , "category": "pick"
-                , "timestamp": util.getTimestampAsString
+                , "timestamp": util.getTimestampAsString()
             }
         )
     })
@@ -251,6 +251,16 @@ jobs.runWarehouseJob = async function () {
         if (productStock[product] < 5) {
             if (Math.random() < 0.3) {
                 var quantity = 10 + Math.floor(Math.random() * 200)
+                logisticsModel.saveProductStockTransaction(
+                    {
+                        "productIdentifier": product
+                        , "quantityChange": quantity
+                        , "category": "replenish"
+                        , "timestamp": util.getTimestampAsString()
+                    })
+            } else // stock > 5
+            if (Math.random() < 0.1) {
+                var quantity = 10 + Math.floor(Math.random() * 100)
                 logisticsModel.saveProductStockTransaction(
                     {
                         "productIdentifier": product

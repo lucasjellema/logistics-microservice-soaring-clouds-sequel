@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "Elastic:create warehouse index",
+			"name": "Elastic: create warehouse index",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -171,7 +171,65 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"size\": 0,\r\n     \"query\": {\r\n    \"terms\": {\r\n      \"productIdentifier\": [\"42371XX\",\"XCZ\"]\r\n    }\r\n  },\r\n    \"aggs\": {\r\n        \"by_product\": {\r\n            \"terms\": {\r\n                \"field\": \"productIdentifier\"\r\n            },\r\n            \"aggs\": {\r\n                \"stock_count\": {\r\n                    \"sum\": {\r\n                        \"field\": \"quantityChange\"\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}"
+					"raw": "{\r\n    \"size\": 0\r\n    , \"query\": {\r\n  },\r\n    \"aggs\": {\r\n        \"by_product\": {\r\n            \"terms\": {\r\n                \"field\": \"productIdentifier\"\r\n            },\r\n            \"aggs\": {\r\n                \"stock_count\": {\r\n                    \"sum\": {\r\n                        \"field\": \"quantityChange\"\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_search",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"_search"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Query Stock transactions for product(s) ordered by date desc",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"query\": {  \"terms\" : { \"productIdentifier\" : [\"DRP-8\", \"XCZ\"]}\r\n  },\r\n  \"sort\" : [\r\n        { \"timestamp\" : {\"order\" : \"desc\"}}\r\n        ],\r\n    \"aggs\": {\r\n        \"by_product\": {\r\n            \"terms\": {\r\n                \"field\": \"productIdentifier\"\r\n            },\r\n            \"aggs\": {\r\n                \"stock_count\": {\r\n                    \"sum\": {\r\n                        \"field\": \"quantityChange\"\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }}"
+				},
+				"url": {
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_search",
+					"host": [
+						"{{ELASTIC_HOME}}"
+					],
+					"port": "9200",
+					"path": [
+						"warehouse",
+						"_search"
+					]
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Query Details for product(s)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"size\": 0\r\n    , \"query\": {\r\n  },\r\n    \"aggs\": {\r\n        \"by_product\": {\r\n            \"terms\": {\r\n                \"field\": \"productIdentifier\"\r\n            },\r\n            \"aggs\": {\r\n                \"stock_count\": {\r\n                    \"sum\": {\r\n                        \"field\": \"quantityChange\"\r\n                    }\r\n                }\r\n            }\r\n        }\r\n    }\r\n}"
 				},
 				"url": {
 					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_search",
@@ -233,13 +291,13 @@
 					"raw": "{\r\n    \"query\": {\r\n        \"filtered\": {\r\n            \"query\": {\r\n                \"query_string\": {\r\n                    \"query\": \"drama\"\r\n                }\r\n            },\r\n            \"filter\": {\r\n                \"term\": { \"year\": 1962 }\r\n            }\r\n        }\r\n    }\r\n}"
 				},
 				"url": {
-					"raw": "{{ELASTIC_HOME}}:9200/shipping/_search",
+					"raw": "{{ELASTIC_HOME}}:9200/warehouse/_search",
 					"host": [
 						"{{ELASTIC_HOME}}"
 					],
 					"port": "9200",
 					"path": [
-						"shipping",
+						"warehouse",
 						"_search"
 					]
 				},

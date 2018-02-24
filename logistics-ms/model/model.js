@@ -168,18 +168,21 @@ logisticsModel.saveProductStockTransaction = async function (stocktransaction) {
 }
 
 //products is an array of strings with product identifiers: e.g. ["42371XX", "XCZ"]
-logisticsModel.retrieveProductStock = async function (products) {
+logisticsModel.retrieveProductStock = async function (products, includeSortedTransactions) {
     try {
         var productStock = await client.search({
             index: 'warehouse',
             type: 'stocktransaction',
             body: {
-                "size": 0,
+                "size": includeSortedTransactions?1000:0,
                 "query": products ? {
                     "terms": {
                         "productIdentifier": products
                     }
                 } : {},
+                "sort" : [
+                    { "timestamp" : {"order" : "desc"}}
+                    ],
                 "aggs": {
                     "by_product": {
                         "terms": {
@@ -198,10 +201,17 @@ logisticsModel.retrieveProductStock = async function (products) {
         }
         );
         var stock = {};
+
         productStock.aggregations.by_product.buckets.forEach(function (bucket) {
             stock[bucket.key] = bucket.stock_count.value;
             console.log("Stock for " + bucket.key + " = " + bucket.stock_count.value)
         })
+        if (includeSortedTransactions){
+            stock.transactions = productStock.hits.hits.reduce(function (stockTransactions, item) {
+                stockTransactions.push(item._source)
+                return stockTransactions
+            }, [])
+        }
         return stock;
     }
     catch (e) {

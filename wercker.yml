@@ -1,9 +1,12 @@
-box: node:8
+box: node:8.9.4-wheezy
 build:
   steps:
     - script:
+        name: A step that installs the libsasl2-dev library that is required to get Kafka Avro to work
+        code: apt-get update && apt-get install -y libsasl2-dev 
+    - script:
         name: A step that executes `npm install` command and creates node-modules in directory ./logistics-ms based on package.json in that directory 
-        code: npm install --prefix ./logistics-ms 
+        code: npm install --prefix . 
     - script:
         name: Create TLS key and cert
         code: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=nginxsvc/O=nginxsvc"
@@ -87,15 +90,15 @@ redeploy-to-oke:
     
     - script:
         name: "Visualise Kubernetes config"
-        code: cat kubernetes-deployment.yml
+        code: cat kubernetes-replace-deployment.yml
     
         
     - kubectl:
-        name: create deployment
+        name: replace deployment
         server: $KUBERNETES_MASTER
         token: $KUBERNETES_TOKEN
         insecure-skip-tls-verify: true
-        command: apply -f $WERCKER_ROOT/kubernetes-deployment.yml --namespace=$KUBERNETES_NAMESPACE
+        command: replace -f $WERCKER_ROOT/kubernetes-replace-deployment.yml --namespace=$KUBERNETES_NAMESPACE
 
 
 functional-test:

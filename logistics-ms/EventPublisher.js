@@ -8,15 +8,16 @@ KeyedMessage = kafka.KeyedMessage;
 var client;
 KeyedMessage = kafka.KeyedMessage;
 
-var APP_VERSION = "0.8.3"
+var APP_VERSION = "0.8.4"
 var APP_NAME = "EventBusPublisher"
 
 // from the Oracle Event Hub - Platform Cluster Connect Descriptor
 
-var topicName = "a516817-soaring-shipping-news";
+var topicName = process.env.SOARING_SHIPPINGNEWS_TOPIC_NAME||"a516817-soaring-shipping-news";
+var EVENT_HUB_PUBLIC_IP = process.env.EVENT_HUB_HOST || '129.150.77.116';
 
 // from the Oracle Event Hub - Platform Cluster Connect Descriptor
-var kafkaConnectDescriptor = "129.150.77.116";
+var kafkaConnectDescriptor = EVENT_HUB_PUBLIC_IP;
 
 console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 

@@ -40,7 +40,7 @@ kafkaLog.addStream({
 
 
 kafkaAvro.getConsumer({
-  'group.id': 'soaring-event-monitor',
+  'group.id': 'soaring-logistics-ms',
   'socket.keepalive.enable': true,
   'enable.auto.commit': true,
 })

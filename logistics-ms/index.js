@@ -12,7 +12,7 @@ var productEventListener = require("./ProductEventHubListener.js");
 var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.2"
+var APP_VERSION = "0.1.3"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -38,7 +38,6 @@ app.get('/about', function (req, res) {
     res.write("/health (GET)<br/>");
     res.write("NodeJS runtime version " + process.version + "<br/>");
     res.write("incoming headers" + JSON.stringify(req.headers) + "<br/>");
-    res.write("Environment variables: DEMO_GREETING: " + process.env.DEMO_GREETING + "<br/>");
     res.write("ELASTIC_CONNECTOR: " + process.env.ELASTIC_CONNECTOR + "<br/>");
     res.end();
 });

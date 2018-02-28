@@ -8,7 +8,7 @@ KeyedMessage = kafka.KeyedMessage;
 var client;
 KeyedMessage = kafka.KeyedMessage;
 
-var APP_VERSION = "0.8.4"
+var APP_VERSION = "0.8.5"
 var APP_NAME = "EventBusPublisher"
 
 // from the Oracle Event Hub - Platform Cluster Connect Descriptor

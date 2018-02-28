@@ -6,7 +6,7 @@ build:
         code: apt-get update && apt-get install -y libsasl2-dev 
     - script:
         name: A step that executes `npm install` command and creates node-modules in directory ./logistics-ms based on package.json in that directory 
-        code: npm install --prefix . 
+        code: npm install --prefix ./logistics-ms 
     - script:
         name: Create TLS key and cert
         code: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=nginxsvc/O=nginxsvc"

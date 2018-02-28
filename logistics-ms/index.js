@@ -8,9 +8,11 @@ var http = require('http');
 var shipping = require("./shipping.js");
 var stock = require("./stock.js");
 var jobs = require("./jobs.js");
+var productEventListener = require("./ProductEventHubListener.js");
+var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.1"
+var APP_VERSION = "0.1.2"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -50,3 +52,51 @@ app.get('/health', function (req, res) {
 
 shipping.registerAPIs(app);
 stock.registerAPIs(app);
+
+productEventListener.subscribeToEvents(
+    (message) => {
+        console.log("EventBridge: Received AVRO Product event from event hub");
+        console.log(message)
+        try {
+            handleProductEventHubEvent(message);
+        } catch (error) {
+            console.log("failed to handle message from event hub", error);
+
+        }
+
+    }
+);
+
+async function handleProductEventHubEvent(message) {
+    console.log("Event payload " + JSON.stringify(message));
+    var event = {
+        "eventType": "ProductEvent",
+        "payload": {
+            "productIdentifier": message.productId,
+            "productCode": message.productCode.string,
+            "productName": message.productName.string,
+            // "imageUrl": message.imageUrl?message.imageUrl.string:null,
+            // "price": message.price?message.price.double:null,
+            // "size": message.size?message.size.int:null,
+            // "weight": message.weight?message.weight.double:null,
+            // "categories": message.categories,
+            // "tags": message.tags,
+            // "dimension": message.dimension? { 
+            //     "unit": message.dimension.unit?message.dimension.unit.string:null,
+            //     "length": message.dimension.length?message.dimension.length.double:null,
+            //     "height": message.dimension.height?message.dimension.height.double:null,
+            //     "width": message.dimension.width?message.dimension.width.double:null
+            // }:null,
+            "color": message.color?message.color.string:null
+        
+        }
+        ,
+        "module": "products.microservice",
+        "transactionIdentifier": message.productId,
+        "timestamp":util.getTimestampAsString
+    }
+    // store product details in Elastic Search Index products
+    console.log('store product details in Elastic Search Index products for '+ JSON.stringify(event))
+
+//    var result = await model.saveProductEvent(event);
+}

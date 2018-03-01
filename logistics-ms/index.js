@@ -12,7 +12,7 @@ var jobs = require("./jobs.js");
 var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.4"
+var APP_VERSION = "0.1.5"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -44,7 +44,7 @@ app.get('/about', function (req, res) {
 
 
 app.get('/health', function (req, res) {
-    var health = { "status": "OK", "uptime": process.uptime(),"version": APP_VERSION }
+    var health = { "status": "OK", "uptime": process.uptime(),"version": APP_VERSION ,"message":"hello!"}
     res.setHeader('Content-Type', 'application/json');
     res.send(health);
 });

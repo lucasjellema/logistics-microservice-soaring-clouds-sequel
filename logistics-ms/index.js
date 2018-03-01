@@ -8,11 +8,11 @@ var http = require('http');
 var shipping = require("./shipping.js");
 var stock = require("./stock.js");
 var jobs = require("./jobs.js");
-var productEventListener = require("./ProductEventHubListener.js");
+//var productEventListener = require("./ProductEventHubListener.js");
 var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.3"
+var APP_VERSION = "0.1.4"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -52,6 +52,7 @@ app.get('/health', function (req, res) {
 shipping.registerAPIs(app);
 stock.registerAPIs(app);
 
+/*
 productEventListener.subscribeToEvents(
     (message) => {
         console.log("EventBridge: Received AVRO Product event from event hub");
@@ -65,6 +66,7 @@ productEventListener.subscribeToEvents(
 
     }
 );
+*/
 
 async function handleProductEventHubEvent(message) {
     console.log("Event payload " + JSON.stringify(message));

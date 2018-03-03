@@ -248,26 +248,39 @@ jobs.runWarehouseJob = async function () {
     console.log(JSON.stringify(productStock))
     for (var product in productStock) {
         console.log("product" + product + " stock = " + productStock[product])
+        var dice = Math.random();
         if (productStock[product] < 5) {
-            if (Math.random() < 0.3) {
-                var quantity = 10 + Math.floor(Math.random() * 200)
-                logisticsModel.saveProductStockTransaction(
+            console.log("Low stock, seriously consider to replesh")
+            console.log("Die was cast as "+dice)
+            if (dice < 0.3) {
+                console.log("Replenish should happen now ")
+                var quantity = 10 + Math.floor(Math.random() * 10)
+                console.log("Replenish quantity set to "+quantity)
+                var result = await logisticsModel.saveProductStockTransaction(
                     {
                         "productIdentifier": product
                         , "quantityChange": quantity
                         , "category": "replenish"
                         , "timestamp": util.getTimestampAsString()
                     })
-            } else // stock > 5
-            if (Math.random() < 0.1) {
-                var quantity = 10 + Math.floor(Math.random() * 100)
-                logisticsModel.saveProductStockTransaction(
+                    console.log("Result of Replenish  "+JSON.stringify(result))
+                    
+            }
+        } 
+        else { // stock > 5
+            console.log("Safe stock quantity, replenish sparingly (5% chance)")
+            console.log("Die was cast as "+dice)
+            if (dice < 0.05) {
+                var quantity = 5 + Math.floor(Math.random() * 20)
+                console.log("Replenish quantity set to "+quantity)
+                var result = await logisticsModel.saveProductStockTransaction(
                     {
                         "productIdentifier": product
                         , "quantityChange": quantity
                         , "category": "replenish"
                         , "timestamp": util.getTimestampAsString()
                     })
+                    console.log("Result of Replenish  "+JSON.stringify(result))
             }
         }
     }//for
@@ -285,8 +298,8 @@ jobs.runWarehouseJob = async function () {
 
 
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
-var warehouseJobPeriod = 250.0;
-var warehouseJobFluctuation = 20.0;
+var warehouseJobPeriod = 150.0; //seconds
+var warehouseJobFluctuation = 200.0;
 function scheduleWarehouseJob() {
     var delay = warehouseJobPeriod * 1000 + (warehouseJobFluctuation * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runWarehouseJob

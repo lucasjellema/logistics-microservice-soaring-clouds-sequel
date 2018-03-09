@@ -245,7 +245,7 @@ jobs.runWarehouseJob = async function () {
     // if product stock < 5, then replenish in X% of the cases with 10 + random * 200 items
     // if product stock >= 5, then replenish in Y% of the cases with 10 + random * 100 items
     var productStock = await logisticsModel.retrieveProductStock()
-    console.log(JSON.stringify(productStock))
+    console.log("Current Product Stock "+ JSON.stringify(productStock))
     for (var product in productStock) {
         console.log("product" + product + " stock = " + productStock[product])
         var dice = Math.random();

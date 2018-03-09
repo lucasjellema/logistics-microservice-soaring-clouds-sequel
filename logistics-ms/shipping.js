@@ -180,7 +180,7 @@ shipping.registerAPIs = function (app) {
             }
         })
 
-        if (!supportedDestinations.includes(shipping.destination.country)) {
+        if (!supportedDestinations.includes(shipping.destination.country.toLowerCase())) {
             validation.status = "NOK";
             validation.validationFindings.push({
                 "findingType": "invalidDestination"

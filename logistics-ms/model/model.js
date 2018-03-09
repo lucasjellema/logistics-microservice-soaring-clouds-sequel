@@ -114,7 +114,7 @@ logisticsModel.retrieveOpenShippings = async function () {
 
 logisticsModel.cancelShipping = async function (shippingId) {
     try {
- 
+
         var cancelResult = await client.update({
             index: 'shipping',
             type: 'doc',
@@ -136,9 +136,9 @@ logisticsModel.cancelShipping = async function (shippingId) {
         }
         else {
             console.error("Error in Elastic Search - find openshippings " + ":" + JSON.stringify(e))
-        
-        
-        throw e;
+
+
+            throw e;
         }
     }
 }
@@ -169,19 +169,20 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
             index: 'warehouse',
             type: 'stocktransaction',
             body: {
-                "size": includeSortedTransactions?1000:0,
+                "size": includeSortedTransactions ? 1000 : 0,
                 "query": products ? {
                     "terms": {
                         "productIdentifier": products
                     }
                 } : {},
-                "sort" : [
-                    { "timestamp" : {"order" : "desc"}}
-                    ],
+                "sort": [
+                    { "timestamp": { "order": "desc" } }
+                ],
                 "aggs": {
                     "by_product": {
                         "terms": {
                             "field": "productIdentifier"
+                            , "size": 100
                         },
                         "aggs": {
                             "stock_count": {
@@ -201,7 +202,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
             stock[bucket.key] = bucket.stock_count.value;
             console.log("Stock for " + bucket.key + " = " + bucket.stock_count.value)
         })
-        if (includeSortedTransactions){
+        if (includeSortedTransactions) {
             stock.transactions = productStock.hits.hits.reduce(function (stockTransactions, item) {
                 stockTransactions.push(item._source)
                 return stockTransactions
@@ -238,7 +239,7 @@ logisticsModel.saveProduct = async function (product) {
     try {
         var response = await client.index({
             index: 'products',
-//            id: shipping.shippingId,
+            //            id: shipping.shippingId,
             type: 'doc',
             body: product
         }

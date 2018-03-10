@@ -11,7 +11,7 @@ var jobs = require("./jobs.js");
 var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.7"
+var APP_VERSION = "0.1.9"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
@@ -34,6 +34,7 @@ app.get('/about', function (req, res) {
     res.write("/shipping/{shippingId}/status (GET)<br/>");
     res.write("/shipping/{shippingId}/cancel (POST) - mock <br/>");
     res.write("/stock/{productIdentifier} (GET) - mock <br/>");
+    res.write("/stock/{productIdentifier} (POST)  <br/>");
     res.write("/health (GET)<br/>");
     res.write("NodeJS runtime version " + process.version + "<br/>");
     res.write("incoming headers" + JSON.stringify(req.headers) + "<br/>");

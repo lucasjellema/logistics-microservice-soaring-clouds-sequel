@@ -253,3 +253,48 @@ logisticsModel.saveProduct = async function (product) {
     }
 
 }
+// try queries via Kibana
+//http://129.150.114.134:5601/app/kibana#/dev_tools/console?_g=(refreshInterval:('$$hashKey':'object:796',display:'30%20seconds',pause:!f,section:1,value:30000),time:(from:now%2Fw,mode:quick,to:now%2Fw))
+// GET warehouse/_search
+// {
+//   "size": 0,
+//   "query": {},
+//   "sort": [
+//     {
+//       "timestamp": {
+//         "order": "desc"
+//       }
+//     }
+//   ],
+//   "aggs": {
+//     "by_product": {
+//       "terms": {
+//         "field": "productIdentifier"
+//          ,"size": 100
+//       },
+//       "aggs": {
+//         "stock_count": {
+//           "sum": {
+//             "field": "quantityChange"
+//           }
+//         }
+//       }
+//     }
+//   }
+// }
+// POST warehouse/_delete_by_query
+// {
+//   "query": { 
+//     "match": {
+//       "productIdentifier": "5a9a76975f150300017ff1b0"
+//     }
+//   }
+// }
+// POST products/_delete_by_query
+// {
+//   "query": { 
+//     "match": {
+//       "id": "5a9a76975f150300017ff1b0"
+//     }
+//   }
+// }

@@ -3,7 +3,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.3"
+var APP_VERSION = "0.0.4"
 var APP_NAME = "Stock"
 
 var stock = module.exports;
@@ -76,6 +76,26 @@ stock.registerAPIs = function (app) {
             res.send(404);
         }
     });//post product
+
+    app.post('/stock/:productIdentifier', async function (req, res) {
+            var productIdentifier = req.params['productIdentifier'];
+        try {
+            // {
+            //     , "quantityChange": quantity
+            //     , "category": "replenish"  //damaged, lost, correction, discarded, stolen
+            // })
+            var stocktransaction = req.body;
+            stocktransaction.productIdentifier = productIdentifier
+            stocktransaction.timestamp = util.getTimestampAsString()
+            var result = await model.saveProductStockTransaction(stocktransaction);
+            res.setHeader('Content-Type', 'application/json');
+            res.send(result);
+
+        } catch (e) {
+            res.send(404);
+        }
+    });//post stocktransaction
+
 
 }
 

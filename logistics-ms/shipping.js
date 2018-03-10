@@ -153,7 +153,7 @@ shipping.registerAPIs = function (app) {
             res.setHeader('Content-Type', 'application/json');
             res.send(validation);
         }
-        )
+        )   
     });
     // http://www.nationsonline.org/oneworld/country_code_list.htm
     var supportedDestinations = ['nl', 'us', 'uk', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in']

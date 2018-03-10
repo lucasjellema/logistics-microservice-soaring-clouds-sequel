@@ -298,7 +298,7 @@ jobs.runWarehouseJob = async function () {
 
 
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
-var warehouseJobPeriod = 150.0; //seconds
+var warehouseJobPeriod = 250.0; //seconds
 var warehouseJobFluctuation = 200.0;
 function scheduleWarehouseJob() {
     var delay = warehouseJobPeriod * 1000 + (warehouseJobFluctuation * (0.5 - Math.random()) * 1000);

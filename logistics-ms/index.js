@@ -3,7 +3,7 @@ var express = require("express");
 var app = express();
 var bodyParser = require("body-parser");
 var http = require('http');
-
+var cors = require('cors');
 // local modules
 var shipping = require("./shipping.js");
 var stock = require("./stock.js");
@@ -16,6 +16,9 @@ var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION);
 var app = express();
+//Enable CORS pre-flight in all operations
+app.use(cors());
+app.options('*', cors()); // include before other routes
 var server = http.createServer(app);
 server.listen(PORT, function () {
     console.log('Soaring through the Clouds - the Sequel Microservice' + APP_NAME + ' running, Express is listening... at ' + PORT + " for /health, /about and /shipping API calls");

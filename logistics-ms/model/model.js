@@ -223,7 +223,7 @@ logisticsModel.retrieveProducts = async function (products) {
         var products = await client.search({
             index: 'products',
             type: 'doc',
-            body: {
+            body: { "size": 400,
                 "query": products ? {
                     "terms": {
                         "id": products
@@ -253,6 +253,26 @@ logisticsModel.saveProduct = async function (product) {
     }
 
 }
+
+//products is an array of strings with product identifiers: e.g. ["42371XX", "XCZ"]
+logisticsModel.retrieveShippingsForProduct = async function (productIdentifier) {
+    try {
+        var products = await client.search({
+            index: 'shipping',
+            type: 'doc',
+            body: {
+                "query": {
+                    "match": {
+                        "items.productIdentifier": productIdentifier
+                    }
+                }
+            }
+        });
+        return products;
+    } catch (e) { }
+}
+
+
 // try queries via Kibana
 //http://129.150.114.134:5601/app/kibana#/dev_tools/console?_g=(refreshInterval:('$$hashKey':'object:796',display:'30%20seconds',pause:!f,section:1,value:30000),time:(from:now%2Fw,mode:quick,to:now%2Fw))
 // GET warehouse/_search
@@ -295,6 +315,16 @@ logisticsModel.saveProduct = async function (product) {
 //   "query": { 
 //     "match": {
 //       "id": "5a9a76975f150300017ff1b0"
+//     }
+//   }
+// }
+
+// FIND shippings that contain a specific product:
+//
+// GET shipping/_search
+// {"query": {
+//     "match": {
+//       "items.productIdentifier": "5a9aae995f150300017ff1b2" 
 //     }
 //   }
 // }

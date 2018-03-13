@@ -11,10 +11,10 @@ var jobs = require("./jobs.js");
 var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.9"
+var APP_VERSION = "0.1.10"
 var APP_NAME = "LogisticsMS"
 
-console.log("Running " + APP_NAME + "version " + APP_VERSION);
+console.log("Running " + APP_NAME + "version " + APP_VERSION+" on port "+PORT);
 var app = express();
 //Enable CORS pre-flight in all operations
 app.use(cors());
@@ -36,6 +36,7 @@ app.get('/about', function (req, res) {
     res.write("/shipping/{shippingId} (DELETE) - mock<br/>");
     res.write("/shipping/{shippingId}/status (GET)<br/>");
     res.write("/shipping/{shippingId}/cancel (POST) - mock <br/>");
+    res.write("/shipping/shipping/forProduct/:productIdentifier (GET) <br/>")    
     res.write("/stock/{productIdentifier} (GET) - mock <br/>");
     res.write("/stock/{productIdentifier} (POST)  <br/>");
     res.write("/health (GET)<br/>");

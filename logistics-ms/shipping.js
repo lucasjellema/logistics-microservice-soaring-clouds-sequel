@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.5"
+var APP_VERSION = "0.0.6"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -78,8 +78,8 @@ shipping.registerAPIs = function (app) {
         if (cancelResult && cancelResult.result == 'updated') {
             res.send(202);
             // publish shipping news: shipping canceled
-            var shippingSrc = await model.retrieveShipping(shippingId); 
-            var shipping = shippingSrc._source 
+            var shippingSrc = await model.retrieveShipping(shippingId);
+            var shipping = shippingSrc._source
             shipping.auditTrail.push({
                 "timestamp": util.getTimestampAsString()
                 , "status": shipping.shippingStatus
@@ -87,7 +87,7 @@ shipping.registerAPIs = function (app) {
             })
             eventBusPublisher.publishShippingEvent(shipping)
             // TODO: update audit trail in stored shipping document too
-            console.log("Shipping Cancelled: "+shippingId)
+            console.log("Shipping Cancelled: " + shippingId)
         } else {
             var status = { "cancellationStatus": "shippingCannotBeCancelled" };
             res.setHeader('Content-Type', 'application/json');
@@ -147,13 +147,54 @@ shipping.registerAPIs = function (app) {
         })
     });
 
+
+    app.get('/shipping/forProduct/:productIdentifier', async function (req, res) {
+        var productIdentifier = req.params['productIdentifier'];
+        var shippingsResult = await model.retrieveShippingsForProduct(productIdentifier, true)
+        try {
+            res.setHeader('Content-Type', 'application/json');
+            console.log("shippings " + JSON.stringify(shippingsResult))
+            // create an array of products - removing all Elasic Search specific properties
+            var shippings =
+                shippingsResult.hits.hits.reduce(function (shippings, item) {
+                    var shipping = item._source
+                    // walk over all shipping.items and find the items with item[].productIdentifier = productIdentifier
+                    // sum quantities to shipping.quantity
+                    shipping.quantity = shipping.items.reduce(function (quantity, item) {
+                        if (item.productIdentifier == productIdentifier) { return quantity + item.itemCount }
+                    }, 0)
+                    shipping.destinationCity = shipping.destination.city
+                    shipping.destinationCountry = shipping.destination.country
+                    // walk over all auditTrail entries and find the most recent one; set shipping.status and shipping.lastUpdateTimestamp from that auditTrail entry
+                    shipping.auditTrail.reduce(function (latestTimestamp, auditEntry) {
+                        if (!latestTimestamp || Date.parse(auditEntry.timestamp) > latestTimestamp) {
+                            shipping.status = auditEntry.status
+                            shipping.lastUpdateTimestamp = auditEntry.timestamp
+                            return Date.parse(auditEntry.timestamp)
+                        } else return latestTimestamp
+
+                    }, null)
+                    shippings.push(shipping)
+                    return shippings
+                }, [])
+            if (shippings.length == 0) {
+                res.send(404);
+                return;
+            }
+            res.send(shippings);
+        } catch (e) {
+            res.send(404);
+        }
+    });
+
+
     app.post('/shipping/validate', function (req, res) {
         var shipping = req.body;
         validateShipping(shipping).then((validation) => {
             res.setHeader('Content-Type', 'application/json');
             res.send(validation);
         }
-        )   
+        )
     });
     // http://www.nationsonline.org/oneworld/country_code_list.htm
     var supportedDestinations = ['nl', 'us', 'uk', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in']
@@ -190,6 +231,8 @@ shipping.registerAPIs = function (app) {
 
         return validation;
     }
+
+
 
     function calculateShippingCosts(shipping) {
         var costs = 1.5;

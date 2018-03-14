@@ -187,7 +187,9 @@ shipping.registerAPIs = function (app) {
         }
     });
 
+    var cors = require('cors');
 
+    app.options('/shipping/validate', cors()) // enable pre-flight request for DELETE request
     app.post('/shipping/validate', function (req, res) {
         var shipping = req.body;
         validateShipping(shipping).then((validation) => {

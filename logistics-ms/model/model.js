@@ -223,7 +223,8 @@ logisticsModel.retrieveProducts = async function (products) {
         var products = await client.search({
             index: 'products',
             type: 'doc',
-            body: { "size": 400,
+            body: {
+                "size": 400,
                 "query": products ? {
                     "terms": {
                         "id": products
@@ -232,7 +233,31 @@ logisticsModel.retrieveProducts = async function (products) {
             }
         });
         return products;
-    } catch (e) { }
+    } catch (e) { console.log("Exception in retrieve products " + JSON.stringify(e)) }
+}
+
+logisticsModel.deleteProduct = async function (documentId) {
+    try {
+        var response = await
+            client.delete({
+                index: 'products',
+                type: 'doc',
+                id: documentId
+            }, function (error, response) {
+                if (error) {
+                    console.log("error occurred when deleting product with doc id " + documentId)
+                    console.log(JSON.stringify(error))
+                } else {
+                    console.log(" deleted product with doc id " + documentId)
+
+                }
+
+            })
+    }
+    catch (e) {
+        console.error("Error in Elastic Search Delete Product - index document " + documentId + ":" + JSON.stringify(e))
+    }
+
 }
 
 logisticsModel.saveProduct = async function (product) {
@@ -328,3 +353,35 @@ logisticsModel.retrieveShippingsForProduct = async function (productIdentifier) 
 //     }
 //   }
 // }
+
+async function deduplicateProducts() {
+    var productResult = await client.search({
+        index: 'products',
+        type: 'doc',
+        body: {
+            "size": 400,
+            "query": {}
+        }
+    });
+    // todo iterate over all products
+    var products = productResult.hits.hits;
+    // if 
+    products.reduce(function (uniqueProducts, item) {
+        var product = item._source
+        console.log(product.id)
+        if (uniqueProducts[product.id]) {
+            console.log('seen it before, go and remove document with id ' + item._id)
+            logisticsModel.deleteProduct(item._id)
+        } else {
+            console.log('first encounter')
+            uniqueProducts[product.id] = 1
+        }
+        return uniqueProducts
+    }, { 'porp1': 0 })
+
+    //   console.log(JSON.stringify(products));
+
+}
+// setTimeout(function () {
+//     deduplicateProducts();
+// }, 1500)

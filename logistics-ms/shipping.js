@@ -147,45 +147,45 @@ shipping.registerAPIs = function (app) {
         })
     });
 
+//demo
+    // app.get('/shipping/forProduct/:productIdentifier', async function (req, res) {
+    //     var productIdentifier = req.params['productIdentifier'];
+    //     var shippingsResult = await model.retrieveShippingsForProduct(productIdentifier, true)
+    //     try {
+    //         res.setHeader('Content-Type', 'application/json');
+    //         console.log("shippings " + JSON.stringify(shippingsResult))
+    //         // create an array of products - removing all Elasic Search specific properties
+    //         var shippings =
+    //             shippingsResult.hits.hits.reduce(function (shippings, item) {
+    //                 var shipping = item._source
+    //                 // walk over all shipping.items and find the items with item[].productIdentifier = productIdentifier
+    //                 // sum quantities to shipping.quantity
+    //                 shipping.quantity = shipping.items.reduce(function (quantity, item) {
+    //                     if (item.productIdentifier == productIdentifier) { return quantity + item.itemCount }
+    //                 }, 0)
+    //                 shipping.destinationCity = shipping.destination.city
+    //                 shipping.destinationCountry = shipping.destination.country
+    //                 // walk over all auditTrail entries and find the most recent one; set shipping.status and shipping.lastUpdateTimestamp from that auditTrail entry
+    //                 shipping.auditTrail.reduce(function (latestTimestamp, auditEntry) {
+    //                     if (!latestTimestamp || Date.parse(auditEntry.timestamp) > latestTimestamp) {
+    //                         shipping.status = auditEntry.status
+    //                         shipping.lastUpdateTimestamp = auditEntry.timestamp
+    //                         return Date.parse(auditEntry.timestamp)
+    //                     } else return latestTimestamp
 
-    app.get('/shipping/forProduct/:productIdentifier', async function (req, res) {
-        var productIdentifier = req.params['productIdentifier'];
-        var shippingsResult = await model.retrieveShippingsForProduct(productIdentifier, true)
-        try {
-            res.setHeader('Content-Type', 'application/json');
-            console.log("shippings " + JSON.stringify(shippingsResult))
-            // create an array of products - removing all Elasic Search specific properties
-            var shippings =
-                shippingsResult.hits.hits.reduce(function (shippings, item) {
-                    var shipping = item._source
-                    // walk over all shipping.items and find the items with item[].productIdentifier = productIdentifier
-                    // sum quantities to shipping.quantity
-                    shipping.quantity = shipping.items.reduce(function (quantity, item) {
-                        if (item.productIdentifier == productIdentifier) { return quantity + item.itemCount }
-                    }, 0)
-                    shipping.destinationCity = shipping.destination.city
-                    shipping.destinationCountry = shipping.destination.country
-                    // walk over all auditTrail entries and find the most recent one; set shipping.status and shipping.lastUpdateTimestamp from that auditTrail entry
-                    shipping.auditTrail.reduce(function (latestTimestamp, auditEntry) {
-                        if (!latestTimestamp || Date.parse(auditEntry.timestamp) > latestTimestamp) {
-                            shipping.status = auditEntry.status
-                            shipping.lastUpdateTimestamp = auditEntry.timestamp
-                            return Date.parse(auditEntry.timestamp)
-                        } else return latestTimestamp
-
-                    }, null)
-                    shippings.push(shipping)
-                    return shippings
-                }, [])
-            if (shippings.length == 0) {
-                res.send(404);
-                return;
-            }
-            res.send(shippings);
-        } catch (e) {
-            res.send(404);
-        }
-    });
+    //                 }, null)
+    //                 shippings.push(shipping)
+    //                 return shippings
+    //             }, [])
+    //         if (shippings.length == 0) {
+    //             res.send(404);
+    //             return;
+    //         }
+    //         res.send(shippings);
+    //     } catch (e) {
+    //         res.send(404);
+    //     }
+    // });
 
     var cors = require('cors');
 

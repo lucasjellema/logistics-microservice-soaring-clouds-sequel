@@ -11,7 +11,7 @@ var jobs = require("./jobs.js");
 var util = require("./util");
 
 var PORT = process.env.APP_PORT || 8096;
-var APP_VERSION = "0.1.12"
+var APP_VERSION = "0.1.13"
 var APP_NAME = "LogisticsMS"
 
 console.log("Running " + APP_NAME + "version " + APP_VERSION+" on port "+PORT);

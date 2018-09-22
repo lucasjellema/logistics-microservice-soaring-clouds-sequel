@@ -30,3 +30,8 @@ The Logistics Microservice leverages the following environment variables:
 The Logistics MS will publish events:
 
 topic: a516817-soaring-shipping-news  for events of type shipping-news-event
+
+
+To run the Logistics Microservice, we can make use of the generic Node application running Docker Container:
+
+docker run --name logistics-ms -p 3006:3001 -p 4500:4500  -e APPLICATION_ROOT_DIRECTORY=logistics-ms -e APP_PORT=3001 -e ELASTIC_CONNECTOR=http://129.156.113.125:9200 -e EVENT_HUB_HOST=129.156.113.171 -e SOARING_SHIPPINGNEWS_TOPIC_NAME=idcs-1d61df536acb4e9d929e79a92f3414b5-soaringshippingnews -e SOARING_PRODUCTS_TOPIC_NAME=idcs-1d61df536acb4e9d929e79a92f3414b5-soaringproducts -e GITHUB_URL=https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel -d node-run-live-reload:0.4.1

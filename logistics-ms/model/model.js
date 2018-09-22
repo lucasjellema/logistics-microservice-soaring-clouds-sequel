@@ -7,6 +7,11 @@ var client = new elasticsearch.Client({
     host: ELASTIC_SEARCH_HOST,
 });
 
+const SHIPPING_INDEX = 'shipping'
+const WAREHOUSE_INDEX = 'warehouse'
+const PRODUCTS_INDEX = 'products'
+
+
 client.ping({
     requestTimeout: 30000,
 }, function (error) {
@@ -20,7 +25,7 @@ client.ping({
 logisticsModel.saveShipping = async function (shipping) {
     try {
         var response = await client.index({
-            index: 'shipping',
+            index: SHIPPING_INDEX,
             id: shipping.shippingId,
             type: 'doc',
             body: shipping
@@ -40,7 +45,7 @@ logisticsModel.updateShipping = async function (shipping) {
     try {
         var response = await client.update({
             retryOnConflict: 3,
-            index: 'shipping',
+            index: SHIPPING_INDEX,
             id: shipping.shippingId,
             type: 'doc',
             body: { "doc": shipping }
@@ -60,7 +65,7 @@ logisticsModel.updateShipping = async function (shipping) {
 logisticsModel.retrieveShipping = async function (shippingId) {
     try {
         var shipping = await client.get({
-            index: 'shipping',
+            index: SHIPPING_INDEX,
             id: shippingId,
             type: 'doc'
         }
@@ -81,7 +86,7 @@ logisticsModel.retrieveOpenShippings = async function () {
         // "lost",
         // "canceled"
         var openShippings = await client.search({
-            index: 'shipping',
+            index: SHIPPING_INDEX,
             type: 'doc',
             body: {
                 "query": {
@@ -116,7 +121,7 @@ logisticsModel.cancelShipping = async function (shippingId) {
     try {
 
         var cancelResult = await client.update({
-            index: 'shipping',
+            index: SHIPPING_INDEX,
             type: 'doc',
             id: shippingId,
             body: {
@@ -146,7 +151,7 @@ logisticsModel.cancelShipping = async function (shippingId) {
 logisticsModel.saveProductStockTransaction = async function (stocktransaction) {
     try {
         var response = await client.index({
-            index: 'warehouse',
+            index: WAREHOUSE_INDEX,
             type: 'stocktransaction',
             body: stocktransaction
         }
@@ -166,7 +171,7 @@ logisticsModel.saveProductStockTransaction = async function (stocktransaction) {
 logisticsModel.retrieveProductStock = async function (products, includeSortedTransactions) {
     try {
         var productStock = await client.search({
-            index: 'warehouse',
+            index: WAREHOUSE_INDEX,
             type: 'stocktransaction',
             body: {
                 "size": includeSortedTransactions ? 1000 : 0,
@@ -221,7 +226,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
 logisticsModel.retrieveProducts = async function (products) {
     try {
         var products = await client.search({
-            index: 'products',
+            index: PRODUCTS_INDEX,
             type: 'doc',
             body: {
                 "size": 400,
@@ -240,7 +245,7 @@ logisticsModel.deleteProduct = async function (documentId) {
     try {
         var response = await
             client.delete({
-                index: 'products',
+                index: PRODUCTS_INDEX,
                 type: 'doc',
                 id: documentId
             }, function (error, response) {
@@ -263,7 +268,7 @@ logisticsModel.deleteProduct = async function (documentId) {
 logisticsModel.saveProduct = async function (product) {
     try {
         var response = await client.index({
-            index: 'products',
+            index: PRODUCTS_INDEX,
             //            id: shipping.shippingId,
             type: 'doc',
             body: product
@@ -356,7 +361,7 @@ logisticsModel.retrieveShippingsForProduct = async function (productIdentifier) 
 
 async function deduplicateProducts() {
     var productResult = await client.search({
-        index: 'products',
+        index: PRODUCTS_INDEX,
         type: 'doc',
         body: {
             "size": 400,

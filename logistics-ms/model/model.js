@@ -1,7 +1,7 @@
 var logisticsModel = module.exports;
 var elasticsearch = require('elasticsearch');
 
-var ELASTIC_SEARCH_HOST = process.env.ELASTIC_CONNECTOR || 'http://129.150.114.134:9200';
+var ELASTIC_SEARCH_HOST = process.env.ELASTIC_CONNECTOR || 'http://129.213.11.15/soaring/elastic';
 
 var client = new elasticsearch.Client({
     host: ELASTIC_SEARCH_HOST,
@@ -234,7 +234,9 @@ logisticsModel.retrieveProducts = async function (products) {
                     "terms": {
                         "id": products
                     }
-                } : {}
+                } : {
+                    "match_all": {}
+                }
             }
         });
         return products;

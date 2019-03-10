@@ -349,7 +349,7 @@ var shipping =
     
             {
                 "productIdentifier": "DROP-456",
-                "itemCount": Math.floor(Math.random() * )
+                "itemCount": Math.floor(Math.random() * 8)
             }
         ]
     }

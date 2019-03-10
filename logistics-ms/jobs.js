@@ -333,7 +333,7 @@ jobs.runShippingGenerationJob = async function () {
     // 
     // randomly derive itemCount
 var shipping = 
-    {
+    {"id": "ORD"+String(Math.floor(Math.random() *10919111)),
         "orderIdentifier": "ORD"+String(Math.floor(Math.random() *10919111)),
         "nameAddressee":  firstNames[Math.floor(Math.random() * firstNames.length)]+" "+lastNames[Math.floor(Math.random() * lastNames.length)],
         "destination": {
@@ -360,8 +360,8 @@ var shipping =
 
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
 // the warehouse job will replenish stock - with a certain chance
-var shippingGenerationJobPeriod = 50.0; //seconds
-var shippingGenerationJobFluctuation = 6.0;
+var shippingGenerationJobPeriod = 500.0; //seconds
+var shippingGenerationJobFluctuation = 70.0;
 function scheduleShippingGenerationJob() {
     var delay = shippingGenerationJobPeriod * 1000 + (shippingGenerationJobFluctuation * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runShippingGenerationJob , delay);

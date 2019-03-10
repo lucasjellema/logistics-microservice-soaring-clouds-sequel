@@ -241,10 +241,13 @@ scheduleJob();
 
 
 jobs.runWarehouseJob = async function () {
+    // first of all, schedule the next execution of the job - in case this execution fails 
+    scheduleWarehouseJob();
     console.log("Run warehouse job at " + new Date())
     // loop over all products in the warehouse; 
     // if product stock < 5, then replenish in X% of the cases with 10 + random * 200 items
     // if product stock >= 5, then replenish in Y% of the cases with 10 + random * 100 items
+
     var productStock = await logisticsModel.retrieveProductStock()
     console.log("Current Product Stock "+ JSON.stringify(productStock))
     for (var product in productStock) {
@@ -294,7 +297,6 @@ jobs.runWarehouseJob = async function () {
     //         , "timestamp": util.getTimestampAsString
     //     }
     // )
-    scheduleWarehouseJob();
 }//runWarehouseJob
 
 

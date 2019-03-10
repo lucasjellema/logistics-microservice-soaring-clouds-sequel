@@ -179,7 +179,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
                     "terms": {
                         "productIdentifier": products
                     }
-                } : {},
+                } : {"match_all": {}},
                 "sort": [
                     { "timestamp": { "order": "desc" } }
                 ],

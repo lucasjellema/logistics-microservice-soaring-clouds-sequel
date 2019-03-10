@@ -317,7 +317,7 @@ scheduleWarehouseJob();
 ////////////////////////
 jobs.runShippingGenerationJob = async function () {
     console.log("Run shipping generation job at " + new Date())
-    setTimeout(jobs.runShippingGenerationJob , delay);
+    scheduleShippingGenerationJob()
 
 }//runShippingGenerationJob
 

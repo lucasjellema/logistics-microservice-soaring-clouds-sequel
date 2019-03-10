@@ -17,7 +17,7 @@ var executionRatio = 0.7;
 // it will process a certain percentage of all shippings (for example 70%)
 //  
 jobs.runShippingJob = function () {
-    console.log("Run shipping job at " + new Date())
+    console.log("Run shipping execution job at " + new Date())
     logisticsModel.retrieveOpenShippings().then((result) => {
         var openShippings = result.hits.hits;
         console.log("Non Closed Shippings " + openShippings.length);
@@ -51,7 +51,7 @@ jobs.runShippingJob = function () {
         console.error("problem finding open shippings " + JSON.stringify(e));
     })
     scheduleJob();
-}
+}//runShippingJob
 
 function addToAuditTrail(shipping, comment) {
     // initialize shipping auditTrail
@@ -64,7 +64,7 @@ function addToAuditTrail(shipping, comment) {
         , "comment": comment
     })
 
-}//runShippingJob
+}//addToAuditTrail
 
 async function pickForShipping(shipping) {
     console.log("Pick for shipping " + shipping.shippingId)
@@ -233,8 +233,7 @@ var x = 127.0;
 var y = 17.0;
 function scheduleJob() {
     var delay = x * 1000 + (y * (0.5 - Math.random()) * 1000);
-    setTimeout(jobs.runShippingJob
-        , delay);
+    setTimeout(jobs.runShippingJob , delay);
 }// scheduleJob
 
 scheduleJob();
@@ -296,14 +295,16 @@ jobs.runWarehouseJob = async function () {
     //     }
     // )
     scheduleWarehouseJob();
-}
+}//runWarehouseJob
 
 
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
 // the warehouse job will replenish stock - with a certain chance
-var warehouseJobPeriod = 250.0; //seconds
-var warehouseJobFluctuation = 30.0;
+var warehouseJobPeriod = 25.0; //seconds
+var warehouseJobFluctuation = 3.0;
+
 function scheduleWarehouseJob() {
+    console.log("Run ScheduleWarehouseJob " + new Date())
     var delay = warehouseJobPeriod * 1000 + (warehouseJobFluctuation * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runWarehouseJob , delay);
 }//scheduleWarehouseJob
@@ -329,8 +330,6 @@ function scheduleShippingGenerationJob() {
     var delay = shippingGenerationJobPeriod * 1000 + (shippingGenerationJobFluctuation * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runShippingGenerationJob , delay);
 }//scheduleShippingGenerationJob
-
-
 
 scheduleShippingGenerationJob()
 

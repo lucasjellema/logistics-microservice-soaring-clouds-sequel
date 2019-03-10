@@ -247,6 +247,7 @@ jobs.runWarehouseJob = async function () {
     // loop over all products in the warehouse; 
     // if product stock < 5, then replenish in X% of the cases with 10 + random * 200 items
     // if product stock >= 5, then replenish in Y% of the cases with 10 + random * 100 items
+    // if product stock >= 150, then replenish in Z% of the cases with 10 + random * 30 items
 
     var productStock = await logisticsModel.retrieveProductStock()
     console.log("Current Product Stock "+ JSON.stringify(productStock))
@@ -302,8 +303,8 @@ jobs.runWarehouseJob = async function () {
 
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
 // the warehouse job will replenish stock - with a certain chance
-var warehouseJobPeriod = 25.0; //seconds
-var warehouseJobFluctuation = 3.0;
+var warehouseJobPeriod = 500.0; //seconds
+var warehouseJobFluctuation = 60.0;
 
 function scheduleWarehouseJob() {
     console.log("Run ScheduleWarehouseJob " + new Date())
@@ -318,9 +319,42 @@ scheduleWarehouseJob();
 ////////////////////////
 // Generate Shippings
 ////////////////////////
+var firstNames = ['John','George','Mia','Maria','Wanda','Rose','Mary','Jacky','Melinda','Carl','Jan','José', 'Alonso','Luis']
+var lastNames = ['Brown','Böhmer','Jansen','Velasquez','Rosario','Miller','Perot','Strauss','Gates','Tromp','Bizet','Wagner','Dorel']
+
 jobs.runShippingGenerationJob = async function () {
     console.log("Run shipping generation job at " + new Date())
     scheduleShippingGenerationJob()
+    // select two products at random
+    // derive random orderIdentifier
+    // define destination from list of options
+    // "destination": { "country": destinations[Math.floor(Math.random() * destinations.length)]
+    // define nameAddressee from list of options
+    // 
+    // randomly derive itemCount
+var shipping = 
+    {
+        "orderIdentifier": "ORD"+String(Math.floor(Math.random() *10919111)),
+        "nameAddressee":  firstNames[Math.floor(Math.random() * firstNames.length)]+" "+lastNames[Math.floor(Math.random() * lastNames.length)],
+        "destination": {
+            "country": "de",
+            "city": "Frankfurt"
+                
+    
+        },
+        "shippingMethod": "economy",
+        "giftWrapping": false,
+        "personalMessage": "",
+        "items": [
+    
+            {
+                "productIdentifier": "DROP-456",
+                "itemCount": Math.floor(Math.random() * 8
+            }
+        ]
+    }
+    logisticsModel.saveShipping(shipping)
+
 
 }//runShippingGenerationJob
 

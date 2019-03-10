@@ -3,7 +3,7 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.7"
+var APP_VERSION = "0.0.8"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -13,8 +13,11 @@ console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 
 var executionRatio = 0.7;
 
+// this job locates all running (open) shippings
+// it will process a certain percentage of all shippings (for example 70%)
+//  
 jobs.runShippingJob = function () {
-    console.log("Run shipping job" + new Date())
+    console.log("Run shipping job at " + new Date())
     logisticsModel.retrieveOpenShippings().then((result) => {
         var openShippings = result.hits.hits;
         console.log("Non Closed Shippings " + openShippings.length);
@@ -61,7 +64,7 @@ function addToAuditTrail(shipping, comment) {
         , "comment": comment
     })
 
-}
+}//runShippingJob
 
 async function pickForShipping(shipping) {
     console.log("Pick for shipping " + shipping.shippingId)
@@ -90,7 +93,7 @@ async function pickForShipping(shipping) {
     // publish shipping news event
     eventBusPublisher.publishShippingEvent(shipping)
 
-}
+}//pickForShipping
 
 
 function handOverShipping(shipping) {
@@ -121,12 +124,12 @@ function handOverShipping(shipping) {
     // publish shipping news event
     eventBusPublisher.publishShippingEvent(shipping)
 
-}
+}//handOverShipping
 
 var depotToRoutingRatio = 0.8;
 var enRouteToNextRatio = 0.6;
 
-var warehouseLocations = ['Singapore,sg', 'Amsterdam,nl', 'Frankfurt,de', 'New York,us', 'Buenos Aires,ar']
+var warehouseLocations = ['Singapore,sg', 'Amsterdam,nl', 'Frankfurt,de', 'New York,us', 'Buenos Aires,ar', 'Cape Town,sa', 'Perth,au']
 
 function handleByParcelDeliveryService(shipping) {
     console.log("Handle by Parcel Delivery Service " + shipping.shippingId)
@@ -232,15 +235,14 @@ function scheduleJob() {
     var delay = x * 1000 + (y * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runShippingJob
         , delay);
-}
-
+}// scheduleJob
 
 scheduleJob();
 
 
 
 jobs.runWarehouseJob = async function () {
-    console.log("Run warehouse job" + new Date())
+    console.log("Run warehouse job at " + new Date())
     // loop over all products in the warehouse; 
     // if product stock < 5, then replenish in X% of the cases with 10 + random * 200 items
     // if product stock >= 5, then replenish in Y% of the cases with 10 + random * 100 items
@@ -298,13 +300,37 @@ jobs.runWarehouseJob = async function () {
 
 
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
+// the warehouse job will replenish stock - with a certain chance
 var warehouseJobPeriod = 250.0; //seconds
-var warehouseJobFluctuation = 200.0;
+var warehouseJobFluctuation = 30.0;
 function scheduleWarehouseJob() {
     var delay = warehouseJobPeriod * 1000 + (warehouseJobFluctuation * (0.5 - Math.random()) * 1000);
-    setTimeout(jobs.runWarehouseJob
-        , delay);
-}
+    setTimeout(jobs.runWarehouseJob , delay);
+}//scheduleWarehouseJob
+
 
 
 scheduleWarehouseJob();
+
+////////////////////////
+// Generate Shippings
+////////////////////////
+jobs.runShippingGenerationJob = async function () {
+    console.log("Run shipping generation job at " + new Date())
+    setTimeout(jobs.runShippingGenerationJob , delay);
+
+}//runShippingGenerationJob
+
+// schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
+// the warehouse job will replenish stock - with a certain chance
+var shippingGenerationJobPeriod = 50.0; //seconds
+var shippingGenerationJobFluctuation = 6.0;
+function scheduleShippingGenerationJob() {
+    var delay = shippingGenerationJobPeriod * 1000 + (shippingGenerationJobFluctuation * (0.5 - Math.random()) * 1000);
+    setTimeout(jobs.runShippingGenerationJob , delay);
+}//scheduleShippingGenerationJob
+
+
+
+scheduleShippingGenerationJob()
+

@@ -199,7 +199,7 @@ shipping.registerAPIs = function (app) {
         )
     });
     // http://www.nationsonline.org/oneworld/country_code_list.htm
-    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in']
+    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in','pt']
 
     var validateShipping = async function (shipping) {
         var validation = {

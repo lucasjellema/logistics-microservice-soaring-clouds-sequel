@@ -335,6 +335,42 @@ function calculateShippingCosts(shipping) {
     }
     return costs;
 }//calculateShippingCosts
+    // http://www.nationsonline.org/oneworld/country_code_list.htm
+    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in','pt']
+
+    var validateShipping = async function (shipping) {
+        var validation = {
+            "status": "OK"
+            , "validationFindings": []
+        };
+        var productIdentifiers = shipping.items.reduce(function (ids, item) {
+            ids.push(item.productIdentifier)
+            return ids
+        }
+            , [])
+        var stocks = await model.retrieveProductStock(productIdentifiers)
+        console.log(JSON.stringify(stocks))
+        shipping.items.forEach(function (item) {
+            if (!stocks[item.productIdentifier] || stocks[item.productIdentifier] < item.itemCount) {
+                validation.status = "NOK";
+                validation.validationFindings.push({
+                    "findingType": "outOfStockItem",
+                    "offendingItem": item
+                })
+            }
+        })
+
+        if (!supportedDestinations.includes(shipping.destination.country.toLowerCase())) {
+            validation.status = "NOK";
+            validation.validationFindings.push({
+                "findingType": "invalidDestination"
+            })
+        }
+        validation.shippingCosts = calculateShippingCosts(shipping)
+
+        return validation;
+    }//validateShipping
+
 
 
 async function processShipping(shipping) {

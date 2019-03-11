@@ -8,7 +8,7 @@ const geocoder = new Nominatim({}, {
     limit: 3
 })
 
-var APP_VERSION = "0.0.9"
+var APP_VERSION = "0.0.11"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -417,6 +417,12 @@ var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl",
 , { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
 , { "country": "ch", "city": "Geneva" }, { "country": "gb", "city": "London" }
 , { "country": "de", "city": "Dortmund" }, { "country": "pt", "city": "Porto" }
+, { "country": "de", "city": "München" }, { "country": "in", "city": "Hyderabad" }
+, { "country": "us", "city": "San Francisco" }, { "country": "in", "city": "Mumbai" }
+, { "country": "us", "city": "Austin" }, { "country": "us", "city": "Seattle" }
+, { "country": "us", "city": "Chicago" }, { "country": "us", "city": "Savannah" }
+, { "country": "us", "city": "New York" }, { "country": "ch", "city": "Montreux" }
+, { "country": "nl", "city": "Amsterdam" }, { "country": "gb", "city": "Bristol" }
 ]
 
 jobs.runShippingGenerationJob = async function () {
@@ -458,7 +464,7 @@ jobs.runShippingGenerationJob = async function () {
 // schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
 // the warehouse job will replenish stock - with a certain chance
 var shippingGenerationJobPeriod = 500.0; //seconds
-var shippingGenerationJobFluctuation = 70.0;
+var shippingGenerationJobFluctuation = 370.0;
 function scheduleShippingGenerationJob() {
     var delay = shippingGenerationJobPeriod * 1000 + (shippingGenerationJobFluctuation * (0.5 - Math.random()) * 1000);
     setTimeout(jobs.runShippingGenerationJob, delay);

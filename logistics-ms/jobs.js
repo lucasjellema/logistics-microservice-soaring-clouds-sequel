@@ -318,8 +318,7 @@ function scheduleWarehouseJob() {
 }//scheduleWarehouseJob
 
 
-
-scheduleWarehouseJob();
+jobs.runWarehouseJob();
 
 ////////////////////////
 // Generate Shippings
@@ -348,7 +347,7 @@ function calculateShippingCosts(shipping) {
             return ids
         }
             , [])
-        var stocks = await model.retrieveProductStock(productIdentifiers)
+        var stocks = await logisticsModel.retrieveProductStock(productIdentifiers)
         console.log(JSON.stringify(stocks))
         shipping.items.forEach(function (item) {
             if (!stocks[item.productIdentifier] || stocks[item.productIdentifier] < item.itemCount) {
@@ -406,7 +405,7 @@ async function processShipping(shipping) {
     catch (error) {
         console.log(error)
     }
-    model.saveShipping(shipping).then((result) => {
+    logisticsModel.saveShipping(shipping).then((result) => {
         eventBusPublisher.publishShippingEvent(shipping)
     })
 
@@ -458,5 +457,5 @@ function scheduleShippingGenerationJob() {
     setTimeout(jobs.runShippingGenerationJob, delay);
 }//scheduleShippingGenerationJob
 
-scheduleShippingGenerationJob()
+jobs.runShippingGenerationJob()
 

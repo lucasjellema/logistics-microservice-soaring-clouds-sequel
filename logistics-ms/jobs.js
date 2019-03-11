@@ -2,8 +2,13 @@
 var logisticsModel = require("./model/model");
 var util = require("./util");
 var eventBusPublisher = require("./EventPublisher.js");
+const Nominatim = require('nominatim-geocoder')
+const geocoder = new Nominatim({}, {
+    format: 'json',
+    limit: 3
+})
 
-var APP_VERSION = "0.0.8"
+var APP_VERSION = "0.0.9"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -319,6 +324,58 @@ scheduleWarehouseJob();
 ////////////////////////
 // Generate Shippings
 ////////////////////////
+
+function calculateShippingCosts(shipping) {
+    var costs = 1.5;
+    shipping.items.forEach(function (item) {
+        costs = costs + (0.3 * item.itemCount)
+    })
+    if ('premium' == shipping.shippingMethod) {
+        costs = costs * 1.34
+    }
+    return costs;
+}//calculateShippingCosts
+
+
+async function processShipping(shipping) {
+    var validationResult = await validateShipping(shipping)
+    if (validationResult.status == "NOK") {
+        console.log('Generated Shipping is not valid and will be discarded')
+        console.log(JSON.stringify(validationResult))
+        return;
+    }
+    // continue of validationresult == OK
+    var shippingId = util.guid();
+    shipping.shippingId = shippingId;
+    shipping.shippingStatus = "new";
+    // initialize shipping auditTrail
+    shipping.auditTrail = [{
+        "timestamp": util.getTimestampAsString()
+        , "status": "new"
+        , "comment": "creation of new shipping"
+    }]
+
+    shipping.shippingCosts = calculateShippingCosts(shipping)
+    shipping.submissionDate = util.getTimestampAsString();
+    // get geo coordinates for destination
+    try {
+        var response = await geocoder.search({ "country": shipping.destination.country, "city": shipping.destination.city })
+        console.log(response)
+        shipping.destination.coordinates = {
+            "lat": response[0].lat,
+            "lon": response[0].lon
+        }
+
+    }
+    catch (error) {
+        console.log(error)
+    }
+    model.saveShipping(shipping).then((result) => {
+        eventBusPublisher.publishShippingEvent(shipping)
+    })
+
+}//processShipping
+
 var firstNames = ['John','George','Mia','Maria','Wanda','Rose','Mary','Jacky','Melinda','Carl','Jan','José', 'Alonso','Luis']
 var lastNames = ['Brown','Böhmer','Jansen','Velasquez','Rosario','Miller','Perot','Strauss','Gates','Tromp','Bizet','Wagner','Dorel']
 
@@ -333,7 +390,7 @@ jobs.runShippingGenerationJob = async function () {
     // 
     // randomly derive itemCount
 var shipping = 
-    {"id": "ORD"+String(Math.floor(Math.random() *10919111)),
+    {
         "orderIdentifier": "ORD"+String(Math.floor(Math.random() *10919111)),
         "nameAddressee":  firstNames[Math.floor(Math.random() * firstNames.length)]+" "+lastNames[Math.floor(Math.random() * lastNames.length)],
         "destination": {
@@ -353,7 +410,7 @@ var shipping =
             }
         ]
     }
-    logisticsModel.saveShipping(shipping)
+    processShipping(shipping)
 
 
 }//runShippingGenerationJob

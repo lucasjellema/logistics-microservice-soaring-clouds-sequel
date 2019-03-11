@@ -414,12 +414,15 @@ async function processShipping(shipping) {
 var firstNames = ['John', 'George', 'Mia', 'Maria', 'Wanda', 'Rose', 'Mary', 'Jacky', 'Melinda', 'Carl', 'Jan', 'José', 'Alonso', 'Luis']
 var lastNames = ['Brown', 'Böhmer', 'Jansen', 'Velasquez', 'Rosario', 'Miller', 'Perot', 'Strauss', 'Gates', 'Tromp', 'Bizet', 'Wagner', 'Dorel']
 var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl", "city": "Zoetermeer" }, { "country": "gb", "city": "Manchester" }, { "country": "nl", "city": "Groningen" }
-    , { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
+, { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
+, { "country": "ch", "city": "Geneva" }, { "country": "gb", "city": "London" }
+, { "country": "de", "city": "Dortmund" }, { "country": "pt", "city": "Porto" }
 ]
 
 jobs.runShippingGenerationJob = async function () {
     console.log("Run shipping generation job at " + new Date())
     scheduleShippingGenerationJob()
+    var products = await logisticsModel.retrieveProducts();
     // select two products at random
     // derive random orderIdentifier
     // define destination from list of options
@@ -438,8 +441,12 @@ jobs.runShippingGenerationJob = async function () {
         "items": [
 
             {
-                "productIdentifier": "DROP-456",
+                "productIdentifier": products.hits.hits[Math.floor(Math.random() * products.hits.hits.length)]._source.id,
                 "itemCount": Math.floor(Math.random() * 8)
+            },
+            {
+                "productIdentifier": products.hits.hits[Math.floor(Math.random() * products.hits.hits.length)]._source.id,
+                "itemCount": Math.floor(Math.random() * 11)
             }
         ]
     }

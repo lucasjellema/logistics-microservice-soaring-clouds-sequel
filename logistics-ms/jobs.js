@@ -33,7 +33,7 @@ jobs.runShippingJob = function () {
         openShippings.forEach(function (hit) {
             // in executionRatio
             if (Math.random() < executionRatio) {
-                if (["lost","new"].includes( hit._source.shippingStatus)) {
+                if (["lost", "new"].includes(hit._source.shippingStatus)) {
                     try {
                         pickForShipping(hit._source)
                     } catch (e) { console.error("error in pick ing " + JSON.stringify(e)) }
@@ -43,7 +43,7 @@ jobs.runShippingJob = function () {
                         handOverShipping(hit._source)
                     } catch (e) { console.error("error in handover to parcel service " + JSON.stringify(e)) }
                 }
-                if (["handedOverToParcelDelivery","enRoute","inDepot"].includes( hit._source.shippingStatus)) {
+                if (["handedOverToParcelDelivery", "enRoute", "inDepot"].includes(hit._source.shippingStatus)) {
                     try {
                         handleByParcelDeliveryService(hit._source)
                     } catch (e) { console.error("error in handling by  parcel service " + JSON.stringify(e)) }
@@ -238,7 +238,7 @@ var x = 127.0;
 var y = 17.0;
 function scheduleJob() {
     var delay = x * 1000 + (y * (0.5 - Math.random()) * 1000);
-    setTimeout(jobs.runShippingJob , delay);
+    setTimeout(jobs.runShippingJob, delay);
 }// scheduleJob
 
 scheduleJob();
@@ -255,17 +255,17 @@ jobs.runWarehouseJob = async function () {
     // if product stock >= 150, then replenish in Z% of the cases with 10 + random * 30 items
 
     var productStock = await logisticsModel.retrieveProductStock()
-    console.log("Current Product Stock "+ JSON.stringify(productStock))
+    console.log("Current Product Stock " + JSON.stringify(productStock))
     for (var product in productStock) {
         console.log("product" + product + " stock = " + productStock[product])
         var dice = Math.random();
         if (productStock[product] < 5) {
             console.log("Low stock, seriously consider to replesh")
-            console.log("Die was cast as "+dice)
+            console.log("Die was cast as " + dice)
             if (dice < 0.3) {
                 console.log("Replenish should happen now ")
                 var quantity = 10 + Math.floor(Math.random() * 10)
-                console.log("Replenish quantity set to "+quantity)
+                console.log("Replenish quantity set to " + quantity)
                 var result = await logisticsModel.saveProductStockTransaction(
                     {
                         "productIdentifier": product
@@ -273,16 +273,16 @@ jobs.runWarehouseJob = async function () {
                         , "category": "replenish"
                         , "timestamp": util.getTimestampAsString()
                     })
-                    console.log("Result of Replenish  "+JSON.stringify(result))
-                    
+                console.log("Result of Replenish  " + JSON.stringify(result))
+
             }
-        } 
+        }
         else { // stock > 5
             console.log("Safe stock quantity, replenish sparingly (5% chance)")
-            console.log("Die was cast as "+dice)
+            console.log("Die was cast as " + dice)
             if (dice < 0.05) {
                 var quantity = 5 + Math.floor(Math.random() * 20)
-                console.log("Replenish quantity set to "+quantity)
+                console.log("Replenish quantity set to " + quantity)
                 var result = await logisticsModel.saveProductStockTransaction(
                     {
                         "productIdentifier": product
@@ -290,7 +290,7 @@ jobs.runWarehouseJob = async function () {
                         , "category": "replenish"
                         , "timestamp": util.getTimestampAsString()
                     })
-                    console.log("Result of Replenish  "+JSON.stringify(result))
+                console.log("Result of Replenish  " + JSON.stringify(result))
             }
         }
     }//for
@@ -314,7 +314,7 @@ var warehouseJobFluctuation = 60.0;
 function scheduleWarehouseJob() {
     console.log("Run ScheduleWarehouseJob " + new Date())
     var delay = warehouseJobPeriod * 1000 + (warehouseJobFluctuation * (0.5 - Math.random()) * 1000);
-    setTimeout(jobs.runWarehouseJob , delay);
+    setTimeout(jobs.runWarehouseJob, delay);
 }//scheduleWarehouseJob
 
 
@@ -376,8 +376,11 @@ async function processShipping(shipping) {
 
 }//processShipping
 
-var firstNames = ['John','George','Mia','Maria','Wanda','Rose','Mary','Jacky','Melinda','Carl','Jan','José', 'Alonso','Luis']
-var lastNames = ['Brown','Böhmer','Jansen','Velasquez','Rosario','Miller','Perot','Strauss','Gates','Tromp','Bizet','Wagner','Dorel']
+var firstNames = ['John', 'George', 'Mia', 'Maria', 'Wanda', 'Rose', 'Mary', 'Jacky', 'Melinda', 'Carl', 'Jan', 'José', 'Alonso', 'Luis']
+var lastNames = ['Brown', 'Böhmer', 'Jansen', 'Velasquez', 'Rosario', 'Miller', 'Perot', 'Strauss', 'Gates', 'Tromp', 'Bizet', 'Wagner', 'Dorel']
+var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl", "city": "Zoetermeer" }, { "country": "gb", "city": "Manchester" }, { "country": "nl", "city": "Groningen" }
+    , { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
+]
 
 jobs.runShippingGenerationJob = async function () {
     console.log("Run shipping generation job at " + new Date())
@@ -389,21 +392,16 @@ jobs.runShippingGenerationJob = async function () {
     // define nameAddressee from list of options
     // 
     // randomly derive itemCount
-var shipping = 
+    var shipping =
     {
-        "orderIdentifier": "ORD"+String(Math.floor(Math.random() *10919111)),
-        "nameAddressee":  firstNames[Math.floor(Math.random() * firstNames.length)]+" "+lastNames[Math.floor(Math.random() * lastNames.length)],
-        "destination": {
-            "country": "de",
-            "city": "Frankfurt"
-                
-    
-        },
+        "orderIdentifier": "ORD" + String(Math.floor(Math.random() * 10919111)),
+        "nameAddressee": firstNames[Math.floor(Math.random() * firstNames.length)] + " " + lastNames[Math.floor(Math.random() * lastNames.length)],
+        "destination": destinations[Math.floor(Math.random() * destinations.length)],
         "shippingMethod": "economy",
         "giftWrapping": false,
         "personalMessage": "",
         "items": [
-    
+
             {
                 "productIdentifier": "DROP-456",
                 "itemCount": Math.floor(Math.random() * 8)
@@ -421,7 +419,7 @@ var shippingGenerationJobPeriod = 500.0; //seconds
 var shippingGenerationJobFluctuation = 70.0;
 function scheduleShippingGenerationJob() {
     var delay = shippingGenerationJobPeriod * 1000 + (shippingGenerationJobFluctuation * (0.5 - Math.random()) * 1000);
-    setTimeout(jobs.runShippingGenerationJob , delay);
+    setTimeout(jobs.runShippingGenerationJob, delay);
 }//scheduleShippingGenerationJob
 
 scheduleShippingGenerationJob()

@@ -8,7 +8,7 @@ const geocoder = new Nominatim({}, {
     limit: 3
 })
 
-var APP_VERSION = "0.0.11"
+var APP_VERSION = "0.0.12"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -22,6 +22,7 @@ var executionRatio = 0.7;
 // it will process a certain percentage of all shippings (for example 70%)
 //  
 jobs.runShippingJob = function () {
+    scheduleJob();
     console.log("Run shipping execution job at " + new Date())
     logisticsModel.retrieveOpenShippings().then((result) => {
         var openShippings = result.hits.hits;
@@ -31,21 +32,23 @@ jobs.runShippingJob = function () {
         // "handedOverToParcelDelivery",
         // end states: "delivered","lost", "canceled"
         openShippings.forEach(function (hit) {
+            var shipping = hit._source
+            shipping.doc_id = hit._id
             // in executionRatio
             if (Math.random() < executionRatio) {
-                if (["lost", "new"].includes(hit._source.shippingStatus)) {
+                if (["lost", "new"].includes(shipping.shippingStatus) || !shipping.shippingStatus) {
                     try {
-                        pickForShipping(hit._source)
+                        pickForShipping(shipping)
                     } catch (e) { console.error("error in pick ing " + JSON.stringify(e)) }
                 }
-                if ("picked" == hit._source.shippingStatus) {
+                if ("picked" == shipping.shippingStatus) {
                     try {
-                        handOverShipping(hit._source)
+                        handOverShipping(shipping)
                     } catch (e) { console.error("error in handover to parcel service " + JSON.stringify(e)) }
                 }
-                if (["handedOverToParcelDelivery", "enRoute", "inDepot"].includes(hit._source.shippingStatus)) {
+                if (["handedOverToParcelDelivery", "enRoute", "inDepot"].includes(shipping.shippingStatus)) {
                     try {
-                        handleByParcelDeliveryService(hit._source)
+                        handleByParcelDeliveryService(shipping)
                     } catch (e) { console.error("error in handling by  parcel service " + JSON.stringify(e)) }
                 }
             }
@@ -55,7 +58,6 @@ jobs.runShippingJob = function () {
     }).catch(function (e) {
         console.error("problem finding open shippings " + JSON.stringify(e));
     })
-    scheduleJob();
 }//runShippingJob
 
 function addToAuditTrail(shipping, comment) {
@@ -72,6 +74,7 @@ function addToAuditTrail(shipping, comment) {
 }//addToAuditTrail
 
 async function pickForShipping(shipping) {
+
     console.log("Pick for shipping " + shipping.shippingId)
     // do stuff, then update shipping
     var result = await logisticsModel.retrieveProductStock(["42371XX", "XCZ", "XCSSSSZ"])
@@ -134,7 +137,7 @@ function handOverShipping(shipping) {
 var depotToRoutingRatio = 0.8;
 var enRouteToNextRatio = 0.6;
 
-var warehouseLocations = ['Singapore,sg', 'Amsterdam,nl', 'Frankfurt,de', 'New York,us', 'Buenos Aires,ar', 'Cape Town,sa', 'Perth,au']
+var warehouseLocations = ['Singapore,sg', 'Amsterdam,nl', 'Frankfurt,de', 'New York,us', 'Buenos Aires,ar', 'Cape Town,za', 'Perth,au']
 
 function handleByParcelDeliveryService(shipping) {
     console.log("Handle by Parcel Delivery Service " + shipping.shippingId)
@@ -241,7 +244,7 @@ function scheduleJob() {
     setTimeout(jobs.runShippingJob, delay);
 }// scheduleJob
 
-scheduleJob();
+jobs.runShippingJob();
 
 
 
@@ -335,7 +338,7 @@ function calculateShippingCosts(shipping) {
     return costs;
 }//calculateShippingCosts
     // http://www.nationsonline.org/oneworld/country_code_list.htm
-    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in','pt']
+    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'au','sg', 'ch', 'in','pt','za','it','ar']
 
     var validateShipping = async function (shipping) {
         var validation = {
@@ -423,6 +426,8 @@ var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl",
 , { "country": "us", "city": "Chicago" }, { "country": "us", "city": "Savannah" }
 , { "country": "us", "city": "New York" }, { "country": "ch", "city": "Montreux" }
 , { "country": "nl", "city": "Amsterdam" }, { "country": "gb", "city": "Bristol" }
+, { "country": "za", "city": "Cape Town" }, { "country": "it", "city": "Pisa" }
+, { "country": "ar", "city": "Buenos Aires" }, { "country": "it", "city": "Napoli" }
 ]
 
 jobs.runShippingGenerationJob = async function () {

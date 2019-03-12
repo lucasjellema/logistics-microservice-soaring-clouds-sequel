@@ -46,7 +46,7 @@ logisticsModel.updateShipping = async function (shipping) {
         var response = await client.update({
             retryOnConflict: 3,
             index: SHIPPING_INDEX,
-            id: shipping.shippingId,
+            id: shipping.doc_id,
             type: 'doc',
             body: { "doc": shipping }
         }
@@ -88,6 +88,7 @@ logisticsModel.retrieveOpenShippings = async function () {
         var openShippings = await client.search({
             index: SHIPPING_INDEX,
             type: 'doc',
+            size: 100,
             body: {
                 "query": {
                     "bool": {

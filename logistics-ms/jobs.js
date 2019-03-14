@@ -1,6 +1,7 @@
 
 var logisticsModel = require("./model/model");
 var util = require("./util");
+
 var eventBusPublisher = require("./EventPublisher.js");
 const Nominatim = require('nominatim-geocoder')
 const geocoder = new Nominatim({}, {
@@ -8,7 +9,7 @@ const geocoder = new Nominatim({}, {
     limit: 3
 })
 
-var APP_VERSION = "0.0.12"
+var APP_VERSION = "0.0.14"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -466,8 +467,6 @@ jobs.runShippingGenerationJob = async function () {
 
 }//runShippingGenerationJob
 
-// schedule a job to run every warehouseJobPeriod seconds with a variation of warehouseJobFluctuation
-// the warehouse job will replenish stock - with a certain chance
 var shippingGenerationJobPeriod = 500.0; //seconds
 var shippingGenerationJobFluctuation = 370.0;
 function scheduleShippingGenerationJob() {
@@ -475,5 +474,5 @@ function scheduleShippingGenerationJob() {
     setTimeout(jobs.runShippingGenerationJob, delay);
 }//scheduleShippingGenerationJob
 
-jobs.runShippingGenerationJob()
+//jobs.runShippingGenerationJob()
 

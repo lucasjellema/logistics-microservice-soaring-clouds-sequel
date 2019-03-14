@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.7"
+var APP_VERSION = "0.0.8"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -199,7 +199,7 @@ shipping.registerAPIs = function (app) {
         )
     });
     // http://www.nationsonline.org/oneworld/country_code_list.htm
-    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in','pt']
+    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in','pt', 'ar','za','au']
 
     var validateShipping = async function (shipping) {
         var validation = {

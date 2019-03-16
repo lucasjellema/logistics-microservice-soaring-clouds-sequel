@@ -1,5 +1,6 @@
 var logisticsModel = module.exports;
 var elasticsearch = require('elasticsearch');
+const logger = require('../logger'); //our logger module
 
 var ELASTIC_SEARCH_HOST = process.env.ELASTIC_CONNECTOR || 'http://129.213.11.15/soaring/elastic';
 
@@ -16,9 +17,9 @@ client.ping({
     requestTimeout: 30000,
 }, function (error) {
     if (error) {
-        console.error('elasticsearch cluster is down!');
+        logger.log('error', `elasticsearch cluster is down! with error ${JSON.stringify(error)}`);
     } else {
-        console.log('Connection to Elastic Search is established');
+        logger.log('info', 'Connection to Elastic Search is established');
     }
 });
 
@@ -32,11 +33,11 @@ logisticsModel.saveShipping = async function (shipping) {
         }
         );
 
-        console.log("Response: " + JSON.stringify(response));
+        logger.log('info', "Response: " + JSON.stringify(response));
         return shipping;
     }
     catch (e) {
-        console.error("Error in Elastic Search - index document " + shipping.shippingId + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search - index document " + shipping.shippingId + ":" + JSON.stringify(e))
     }
 
 }
@@ -52,11 +53,11 @@ logisticsModel.updateShipping = async function (shipping) {
         }
         );
 
-        console.log("Response: " + JSON.stringify(response));
+        logger.log('info', "Response: " + JSON.stringify(response));
         return shipping;
     }
     catch (e) {
-        console.error("Error in Elastic Search - update document " + shipping.shippingId + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search - update document " + shipping.shippingId + ":" + JSON.stringify(e))
     }
 
 }
@@ -73,10 +74,44 @@ logisticsModel.retrieveShipping = async function (shippingId) {
         return shipping;
     }
     catch (e) {
-        console.error("Error in Elastic Search - get document " + shippingId + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search - get document " + shippingId + ":" + JSON.stringify(e))
         throw e;
     }
 }
+
+
+logisticsModel.retrieveDateRangeShippings = async function (range) {
+    // week: this week's shippings:  now-1w/w
+    // today: today's shippings:  now-1d/d
+    // month: this month's shippings:  now-1M/M
+    // year: this year's shippings:  now-1y/y
+    var dateRange ="now-1d/d"
+    try {
+        var todaysShippings = await client.search({
+            index: SHIPPING_INDEX,
+            type: 'doc',
+            size: 2500,
+            body: {
+                "query": {
+                    "range": {
+                        "submissionDate": {
+                            "gte": dateRange,
+                            "lt": "now/d"
+                        }
+                    }
+                }
+            }
+        }
+        );
+        return todaysShippings;
+    }
+    catch (e) {
+        logger.log('error', "Error in Elastic Search - find todaysShippings " + ":" + JSON.stringify(e))
+        throw e;
+    }
+}//retrieveTodaysShippings
+
+
 logisticsModel.retrieveOpenShippings = async function () {
     try {
         // "new",
@@ -88,7 +123,7 @@ logisticsModel.retrieveOpenShippings = async function () {
         var openShippings = await client.search({
             index: SHIPPING_INDEX,
             type: 'doc',
-            size: 100,
+            size: 500,
             body: {
                 "query": {
                     "bool": {
@@ -113,7 +148,7 @@ logisticsModel.retrieveOpenShippings = async function () {
         return openShippings;
     }
     catch (e) {
-        console.error("Error in Elastic Search - find openshippings " + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search - find openshippings " + ":" + JSON.stringify(e))
         throw e;
     }
 }
@@ -137,11 +172,11 @@ logisticsModel.cancelShipping = async function (shippingId) {
     }
     catch (e) {
         if (e.status = 404) {
-            console.log("Shipping Document was not found")
+            logger.log('info', "Shipping Document was not found")
             return {};
         }
         else {
-            console.error("Error in Elastic Search - find openshippings " + ":" + JSON.stringify(e))
+            logger.log('error', "Error in Elastic Search - find openshippings " + ":" + JSON.stringify(e))
 
 
             throw e;
@@ -158,11 +193,11 @@ logisticsModel.saveProductStockTransaction = async function (stocktransaction) {
         }
         );
 
-        console.log("Response: " + JSON.stringify(response));
+        logger.log('info', "Response: " + JSON.stringify(response));
         return stocktransaction;
     }
     catch (e) {
-        console.error("Error in Elastic Search - create stocktransaction document :" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search - create stocktransaction document :" + JSON.stringify(e))
         throw e
     }
 
@@ -180,7 +215,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
                     "terms": {
                         "productIdentifier": products
                     }
-                } : {"match_all": {}},
+                } : { "match_all": {} },
                 "sort": [
                     { "timestamp": { "order": "desc" } }
                 ],
@@ -206,7 +241,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
 
         productStock.aggregations.by_product.buckets.forEach(function (bucket) {
             stock[bucket.key] = bucket.stock_count.value;
-            console.log("Stock for " + bucket.key + " = " + bucket.stock_count.value)
+            logger.log('info', "Stock for " + bucket.key + " = " + bucket.stock_count.value)
         })
         if (includeSortedTransactions) {
             stock.transactions = productStock.hits.hits.reduce(function (stockTransactions, item) {
@@ -217,7 +252,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
         return stock;
     }
     catch (e) {
-        console.error("Error in Elastic Search - find productStock " + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search - find productStock " + ":" + JSON.stringify(e))
         throw e;
     }
 }
@@ -225,6 +260,7 @@ logisticsModel.retrieveProductStock = async function (products, includeSortedTra
 
 //products is an array of strings with product identifiers: e.g. ["42371XX", "XCZ"]
 logisticsModel.retrieveProducts = async function (products) {
+    logger.log('info', 'retrieveProducts - start')
     try {
         var products = await client.search({
             index: PRODUCTS_INDEX,
@@ -236,12 +272,14 @@ logisticsModel.retrieveProducts = async function (products) {
                         "id": products
                     }
                 } : {
-                    "match_all": {}
-                }
+                        "match_all": {}
+                    }
             }
         });
+        logger.log('info', `retrieveProducts - end ${JSON.stringify(products)}`)
+
         return products;
-    } catch (e) { console.log("Exception in retrieve products " + JSON.stringify(e)) }
+    } catch (e) { logger.log('info', "Exception in retrieve products " + JSON.stringify(e)) }
 }
 
 logisticsModel.deleteProduct = async function (documentId) {
@@ -253,17 +291,17 @@ logisticsModel.deleteProduct = async function (documentId) {
                 id: documentId
             }, function (error, response) {
                 if (error) {
-                    console.log("error occurred when deleting product with doc id " + documentId)
-                    console.log(JSON.stringify(error))
+                    logger.log('info', "error occurred when deleting product with doc id " + documentId)
+                    logger.log('info', JSON.stringify(error))
                 } else {
-                    console.log(" deleted product with doc id " + documentId)
+                    logger.log('info', " deleted product with doc id " + documentId)
 
                 }
 
             })
     }
     catch (e) {
-        console.error("Error in Elastic Search Delete Product - index document " + documentId + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search Delete Product - index document " + documentId + ":" + JSON.stringify(e))
     }
 
 }
@@ -278,11 +316,11 @@ logisticsModel.saveProduct = async function (product) {
         }
         );
 
-        console.log("Response: " + JSON.stringify(response));
+        logger.log('info', "Response: " + JSON.stringify(response));
         return product;
     }
     catch (e) {
-        console.error("Error in Elastic Search Save Product - index document " + product.id + ":" + JSON.stringify(e))
+        logger.log('error', "Error in Elastic Search Save Product - index document " + product.id + ":" + JSON.stringify(e))
     }
 
 }
@@ -376,18 +414,18 @@ async function deduplicateProducts() {
     // if 
     products.reduce(function (uniqueProducts, item) {
         var product = item._source
-        console.log(product.id)
+        logger.log('info', product.id)
         if (uniqueProducts[product.id]) {
-            console.log('seen it before, go and remove document with id ' + item._id)
+            logger.log('info', 'seen it before, go and remove document with id ' + item._id)
             logisticsModel.deleteProduct(item._id)
         } else {
-            console.log('first encounter')
+            logger.log('info', 'first encounter')
             uniqueProducts[product.id] = 1
         }
         return uniqueProducts
     }, { 'porp1': 0 })
 
-    //   console.log(JSON.stringify(products));
+    //   logger.log('info',JSON.stringify(products));
 
 }
 // setTimeout(function () {

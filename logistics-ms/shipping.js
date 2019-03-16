@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.8"
+var APP_VERSION = "0.0.9"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -60,6 +60,19 @@ shipping.registerAPIs = function (app) {
             res.send(404);
         })
     });
+
+    app.get('/shipping/period/:period', function (req, res) {
+        // dateRange = day, week, month, year
+        var dateRange = req.params['period'];
+        model.retrieveDateRangeShippings(dateRange).then((result) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.send(result._source);
+
+        }).catch(function (e) {
+            res.send(404);
+        })
+    });
+
 
     app.get('/shipping/:shippingId/status', function (req, res) {
         var shippingId = req.params['shippingId'];

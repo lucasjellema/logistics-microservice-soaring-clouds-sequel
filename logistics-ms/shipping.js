@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.10"
+var APP_VERSION = "0.0.11"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -25,52 +25,53 @@ shipping.registerAPIs = function (app) {
         var dateRange = req.params['period'];
         model.retrieveDateRangeShippings(dateRange).then((result) => {
             res.setHeader('Content-Type', 'application/json');
-            res.send(result._source);
+            res.send(result.hits.hits
+                );
 
         }).catch(function (e) {
             res.send(404);
         })
     });
 
-//demo
-app.get('/shipping/forProduct/:productIdentifier', async function (req, res) {
-    var productIdentifier = req.params['productIdentifier'];
-    var shippingsResult = await model.retrieveShippingsForProduct(productIdentifier, true)
-    try {
-        res.setHeader('Content-Type', 'application/json');
-        console.log("shippings " + JSON.stringify(shippingsResult))
-        // create an array of products - removing all Elasic Search specific properties
-        var shippings =
-            shippingsResult.hits.hits.reduce(function (shippings, item) {
-                var shipping = item._source
-                // walk over all shipping.items and find the items with item[].productIdentifier = productIdentifier
-                // sum quantities to shipping.quantity
-                shipping.quantity = shipping.items.reduce(function (quantity, item) {
-                    if (item.productIdentifier == productIdentifier) { return quantity + item.itemCount }
-                }, 0)
-                shipping.destinationCity = shipping.destination.city
-                shipping.destinationCountry = shipping.destination.country
-                // walk over all auditTrail entries and find the most recent one; set shipping.status and shipping.lastUpdateTimestamp from that auditTrail entry
-                shipping.auditTrail.reduce(function (latestTimestamp, auditEntry) {
-                    if (!latestTimestamp || Date.parse(auditEntry.timestamp) > latestTimestamp) {
-                        shipping.status = auditEntry.status
-                        shipping.lastUpdateTimestamp = auditEntry.timestamp
-                        return Date.parse(auditEntry.timestamp)
-                    } else return latestTimestamp
+    //demo
+    app.get('/shipping/forProduct/:productIdentifier', async function (req, res) {
+        var productIdentifier = req.params['productIdentifier'];
+        var shippingsResult = await model.retrieveShippingsForProduct(productIdentifier, true)
+        try {
+            res.setHeader('Content-Type', 'application/json');
+            console.log("shippings " + JSON.stringify(shippingsResult))
+            // create an array of products - removing all Elasic Search specific properties
+            var shippings =
+                shippingsResult.hits.hits.reduce(function (shippings, item) {
+                    var shipping = item._source
+                    // walk over all shipping.items and find the items with item[].productIdentifier = productIdentifier
+                    // sum quantities to shipping.quantity
+                    shipping.quantity = shipping.items.reduce(function (quantity, item) {
+                        if (item.productIdentifier == productIdentifier) { return quantity + item.itemCount }
+                    }, 0)
+                    shipping.destinationCity = shipping.destination.city
+                    shipping.destinationCountry = shipping.destination.country
+                    // walk over all auditTrail entries and find the most recent one; set shipping.status and shipping.lastUpdateTimestamp from that auditTrail entry
+                    shipping.auditTrail.reduce(function (latestTimestamp, auditEntry) {
+                        if (!latestTimestamp || Date.parse(auditEntry.timestamp) > latestTimestamp) {
+                            shipping.status = auditEntry.status
+                            shipping.lastUpdateTimestamp = auditEntry.timestamp
+                            return Date.parse(auditEntry.timestamp)
+                        } else return latestTimestamp
 
-                }, null)
-                shippings.push(shipping)
-                return shippings
-            }, [])
-        if (shippings.length == 0) {
+                    }, null)
+                    shippings.push(shipping)
+                    return shippings
+                }, [])
+            if (shippings.length == 0) {
+                res.send(404);
+                return;
+            }
+            res.send(shippings);
+        } catch (e) {
             res.send(404);
-            return;
         }
-        res.send(shippings);
-    } catch (e) {
-        res.send(404);
-    }
-});
+    });
 
 
     app.get('/shipping/:shippingId', function (req, res) {
@@ -214,7 +215,7 @@ app.get('/shipping/forProduct/:productIdentifier', async function (req, res) {
         )
     });
     // http://www.nationsonline.org/oneworld/country_code_list.htm
-    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in','pt', 'ar','za','au']
+    var supportedDestinations = ['nl', 'us', 'uk', 'gb', 'de', 'po', 'pr', 'ni', 'ma', 'sg', 'ch', 'in', 'pt', 'ar', 'za', 'au']
 
     var validateShipping = async function (shipping) {
         var validation = {

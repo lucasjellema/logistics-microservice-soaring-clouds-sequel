@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.9"
+var APP_VERSION = "0.0.10"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -18,6 +18,20 @@ var shipping = module.exports;
 console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 
 shipping.registerAPIs = function (app) {
+
+
+    app.get('/shipping/period/:period', function (req, res) {
+        // dateRange = day, week, month, year
+        var dateRange = req.params['period'];
+        model.retrieveDateRangeShippings(dateRange).then((result) => {
+            res.setHeader('Content-Type', 'application/json');
+            res.send(result._source);
+
+        }).catch(function (e) {
+            res.send(404);
+        })
+    });
+
 
     app.get('/shipping/:shippingId', function (req, res) {
         var shippingId = req.params['shippingId'];
@@ -53,18 +67,6 @@ shipping.registerAPIs = function (app) {
            };
            */
         model.retrieveShipping(shippingId).then((result) => {
-            res.setHeader('Content-Type', 'application/json');
-            res.send(result._source);
-
-        }).catch(function (e) {
-            res.send(404);
-        })
-    });
-
-    app.get('/shipping/period/:period', function (req, res) {
-        // dateRange = day, week, month, year
-        var dateRange = req.params['period'];
-        model.retrieveDateRangeShippings(dateRange).then((result) => {
             res.setHeader('Content-Type', 'application/json');
             res.send(result._source);
 

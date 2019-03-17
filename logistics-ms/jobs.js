@@ -9,7 +9,7 @@ const geocoder = new Nominatim({}, {
     limit: 3
 })
 
-var APP_VERSION = "0.0.14"
+var APP_VERSION = "0.0.15"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -17,7 +17,7 @@ var jobs = module.exports;
 
 console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 
-var executionRatio = 0.7;
+var baseExecutionRatio = 0.6;
 
 // this job locates all running (open) shippings
 // it will process a certain percentage of all shippings (for example 70%)
@@ -35,6 +35,16 @@ jobs.runShippingJob = function () {
         openShippings.forEach(function (hit) {
             var shipping = hit._source
             shipping.doc_id = hit._id
+            executionRatio= baseExecutionRatio
+
+            // decrease executionRatio depending on
+            // - item count (odd * 0.5, 13 * 0.1)
+            var totalItemCount = shipping.items.reduce(function sum(total, item){return total+ item.itemCount},0)  
+            if (Math.abs(totalItemCount % 2) == 1 ) executionRatio = executionRatio * 0.5
+            if (totalItemCount  == 13 ) executionRatio = executionRatio * 0.1
+            // - destination (country nl *1.5, us * 0.2)
+            executionRatio = executionRatio* (['nl','au'].includes(shipping.destination.country) ? 1.5 :  (['ch','us'].includes(shipping.destination.country)? 0.2:1 ))
+            
             // in executionRatio
             if (Math.random() < executionRatio) {
                 if (["lost", "new"].includes(shipping.shippingStatus) || !shipping.shippingStatus) {
@@ -78,8 +88,8 @@ async function pickForShipping(shipping) {
 
     console.log("Pick for shipping " + shipping.shippingId)
     // do stuff, then update shipping
-    var result = await logisticsModel.retrieveProductStock(["42371XX", "XCZ", "XCSSSSZ"])
-
+//    var result = await logisticsModel.retrieveProductStock(["42371XX", "XCZ", "XCSSSSZ"])
+//TODO deal with case where stock is not enough to pick!
     shipping.items.forEach(function (item) {
         logisticsModel.saveProductStockTransaction(
             {
@@ -90,8 +100,6 @@ async function pickForShipping(shipping) {
             }
         )
     })
-
-
     // - set new status
     shipping.shippingStatus = "picked";
     // - extend audit

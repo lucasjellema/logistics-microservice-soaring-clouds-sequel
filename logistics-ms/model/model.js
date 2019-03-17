@@ -85,7 +85,11 @@ logisticsModel.retrieveDateRangeShippings = async function (range) {
     // today: today's shippings:  now-1d/d
     // month: this month's shippings:  now-1M/M
     // year: this year's shippings:  now-1y/y
-    const ranges = {"day":"now-1d/d","week":"now-1w/w","month":"now-1M/M","year":"now-1y/y"}
+    const ranges = {"day":{"lower": "now/d", "higher":"now+1d/d"}
+                   ,"week":{"lower": "now/w", "higher":"now+1w/w"}
+                   ,"month":{"lower": "now/M", "higher":"now+1M/M"}
+                   ,"year":{"lower": "now/y", "higher":"now+1y/y"}
+                }
     var dateRange =ranges[range]
     try {
         var todaysShippings = await client.search({
@@ -96,8 +100,8 @@ logisticsModel.retrieveDateRangeShippings = async function (range) {
                 "query": {
                     "range": {
                         "submissionDate": {
-                            "gte": dateRange,
-                            "lt": "now/d"
+                            "gte": dateRange.lower,
+                            "lt": dateRange.higher
                         }
                     }
                 }

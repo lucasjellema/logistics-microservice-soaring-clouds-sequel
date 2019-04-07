@@ -349,6 +349,25 @@ logisticsModel.retrieveShippingsForProduct = async function (productIdentifier) 
 }
 
 
+logisticsModel.retrieveShippingForOrder = async function (orderIdentifier) {
+    try {
+        var shipping = await client.search({
+            index: 'shipping',
+            type: 'doc',
+            body: {
+                "query": {
+                    "match": {                        
+                            "orderIdentifier": {
+                              "query": orderIdentifier
+                            }
+                    }
+                }
+            }
+        });
+        return shipping;
+    } catch (e) { }
+}
+
 // try queries via Kibana
 //http://129.150.114.134:5601/app/kibana#/dev_tools/console?_g=(refreshInterval:('$$hashKey':'object:796',display:'30%20seconds',pause:!f,section:1,value:30000),time:(from:now%2Fw,mode:quick,to:now%2Fw))
 // GET warehouse/_search

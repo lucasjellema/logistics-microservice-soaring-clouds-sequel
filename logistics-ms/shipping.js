@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.11"
+var APP_VERSION = "0.0.12"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -123,6 +123,19 @@ shipping.registerAPIs = function (app) {
             res.setHeader('Content-Type', 'application/json');
             var status = { "status": result._source.shippingStatus };
             res.send(status);
+        }).catch(function (e) {
+            res.send(404);
+        })
+    });
+
+
+    app.get('/shipping/forOrder/:orderIdentifier', function (req, res) {
+        var orderIdentifier = req.params['orderIdentifier'];
+        model.retrieveShippingForOrder(orderIdentifier).then((result) => {
+            res.setHeader('Content-Type', 'application/json');
+            console.log("Result: "+JSON.stringify(result))
+            var shipping =  result.hits.hits[0]._source;
+            res.send(shipping);
         }).catch(function (e) {
             res.send(404);
         })

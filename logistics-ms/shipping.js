@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.12"
+var APP_VERSION = "0.0.13"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -26,7 +26,7 @@ shipping.registerAPIs = function (app) {
         model.retrieveDateRangeShippings(dateRange).then((result) => {
             res.setHeader('Content-Type', 'application/json');
             res.send(result.hits.hits
-                );
+            );
 
         }).catch(function (e) {
             res.send(404);
@@ -133,9 +133,61 @@ shipping.registerAPIs = function (app) {
         var orderIdentifier = req.params['orderIdentifier'];
         model.retrieveShippingForOrder(orderIdentifier).then((result) => {
             res.setHeader('Content-Type', 'application/json');
-            console.log("Result: "+JSON.stringify(result))
-            var shipping =  result.hits.hits[0]._source;
+            console.log("Result: " + JSON.stringify(result))
+            var shipping = result.hits.hits[0]._source;
             res.send(shipping);
+        }).catch(function (e) {
+            res.send(404);
+        })
+    });
+
+    app.get('/shippingUI/forOrder/:orderIdentifier', function (req, res) {
+        var orderIdentifier = req.params['orderIdentifier'];
+        model.retrieveShippingForOrder(orderIdentifier).then((result) => {
+            res.setHeader('Content-Type', 'text/html');
+            console.log("Result: " + JSON.stringify(result))
+            var shipping = result.hits.hits[0]._source;
+            var auditTrail = `<ol>`
+            shipping.auditTrail.forEach(function (entry) {
+                auditTrail = auditTrail.concat(`<li><b><i>${entry.status}</i></b> (time: ${entry.timestamp.substr(entry.timestamp.indexOf('T') + 1)})</li>`)
+            })
+            auditTrail = auditTrail.concat('</ol>')
+
+            var parcels = `Number of parcels ${shipping.parcels.length}<br/ >`
+            shipping.parcels.forEach(function (parcel,index) {
+                parcels = parcels.concat(`${index + 1} - Track and Trace Identifier: ${parcel.trackAndTraceIdentifier}`)
+                parcels = parcels.concat('<ol>')
+                parcel.parcelLogItems.forEach(function (item) {
+                    parcels = parcels.concat(`<li><b><i>${item.parcelStatus}</i></b> ${item.parcelLogTimestamp?' (time: '+ item.parcelLogTimestamp +')':''} - ${item.location}</li>`)
+                })
+                parcels = parcels.concat('</ol>')
+            })
+            var html = `<html>
+            <head>
+              <title>Soaring - Shipping Details for Order</title>
+              <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+              <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+              <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+              <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+            </head>
+            <body>
+                <div class="jumbotron"  style="padding:40px;">
+                  <h1>Shipping Details for order ${orderIdentifier}</h1>
+                </div>
+                <div>
+                <h3>Current Status: ${shipping.shippingStatus}</h3>
+                <h3>Destination: ${shipping.destination.city}, ${shipping.destination.country}</h3>
+                <h3>Submission Date (order received by Logistics): ${shipping.submissionDate}</h3>
+                <h3>Shipping Audit Trail:</h3>
+                ${auditTrail}
+                <br />
+                <h3>Parcel Details:</h3>
+                ${parcels}
+              </div>
+            </body>
+            </html>`
+
+            res.send(html);
         }).catch(function (e) {
             res.send(404);
         })

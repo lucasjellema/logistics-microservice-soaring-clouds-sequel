@@ -11,7 +11,7 @@ const geocoder = new Nominatim({}, {
     limit: 3
 })
 
-var APP_VERSION = "0.0.16"
+var APP_VERSION = "0.0.17"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -123,12 +123,15 @@ function handOverToExternalShipper(shipping) {
     // - set new status
     shipping.shippingStatus = "madeAvailableToExternalShipper";
     // - extend audit
+    console.log(`Update audit trail and shipping document`)
     addToAuditTrail(shipping, `parcel(s) made available to external shipper ${shipping.shipping.shippingCompany}`)
     // save shipping document
     logisticsModel.updateShipping(shipping)
     // publish event to soaring-orderpicked
     console.log('Going to publish Shipping Picked event')
-    var event = { "orderId": shipping.orderIdentifier, "date": { "int": Math.floor(Date.now() / 1000) } }
+    var timestamp = Math.round((new Date()).getTime() / 1000)
+    var event = { "orderId": shipping.orderIdentifier, "date": { "int": timestamp } }
+    console.log(`Going to publish Shipping Picked event ${event}`)
     avroEventBusPublisher.publishShipmentPicked(event)
     console.log('Shipping Picked was published')
 }// handOverToExternalShipper

@@ -127,7 +127,7 @@ function handOverToExternalShipper(shipping) {
     // save shipping document
     logisticsModel.updateShipping(shipping)
     // publish event to soaring-orderpicked
-    var event = { "orderId": shipping.orderIdentifier, "date": { "int": new Date().getTime() } }
+    var event = { "orderId": shipping.orderIdentifier, "date": { "int": Math.floor(Date.now() / 1000) } }
     avroEventBusPublisher.publishShipmentPicked(event)
     console.log('Shipping Picked was published')
 }// handOverToExternalShipper

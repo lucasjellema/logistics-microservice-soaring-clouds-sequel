@@ -130,10 +130,10 @@ function handOverToExternalShipper(shipping) {
     // publish event to soaring-orderpicked
     console.log('Going to publish Shipping Picked event')
     var timestamp = Math.round((new Date()).getTime() / 1000)
-    var event = { "orderId": shipping.orderIdentifier, "date": { "int": timestamp } }
+    var event = { "orderId": shipping.orderIdentifier, "date":  timestamp  }
     console.log(`Going to publish Shipping Picked event ${JSON.stringify(event)}`)
     // TODO fix the value for date; for some reason it is too big
-    event.date.int=42
+    //event.date=42
     avroEventBusPublisher.publishShipmentPicked(event)
     console.log('Shipping Picked was published')
 }// handOverToExternalShipper

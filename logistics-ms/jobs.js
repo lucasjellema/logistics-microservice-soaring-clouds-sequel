@@ -3,7 +3,8 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 
 var eventBusPublisher = require("./EventPublisher.js");
-var avroEventBusPublisher = require("./AvroEventPublisher.js");
+const avroEventBusPublisher = require("./AvroEventPublisher.js");
+avroEventBusPublisher.initKafkaAvro()
 const Nominatim = require('nominatim-geocoder')
 const geocoder = new Nominatim({}, {
     format: 'json',

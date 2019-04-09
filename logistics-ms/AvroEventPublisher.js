@@ -11,6 +11,7 @@ const SHIPMENT_PICKED_TOPIC = process.env.KAFKA_SHIPMENT_PICKED_TOPIC || 'soarin
 
 
 exports.initKafkaAvro = function () {
+    console.log("initKafkaAvro")
     kafkaAvro = new KafkaAvro(
             {
                 kafkaBroker: kafkaBrokerVar,
@@ -23,12 +24,15 @@ exports.initKafkaAvro = function () {
     kafkaAvro.init()
             .then(function () {
                 logger.info('Kafka Avro Ready to use');
+                console.log("initKafkaAvro - Kafka is ready")
 
             });
 };
 
 exports.publishShipmentPicked = function (payload) {
     logger.debug('publishing shipment picked event ' + JSON.stringify(payload));
+    console.log('publishing shipment picked event ' + JSON.stringify(payload))
+
     kafkaAvro.getProducer({
     }).then(function (producer) {
         var topicName = SHIPMENT_PICKED_TOPIC;
@@ -40,6 +44,8 @@ exports.publishShipmentPicked = function (payload) {
         producer.on('event.error', function (err) {
             logger.error('Error from producer');
             logger.error(err);
+            console.log('error in publishing shipment picked event ' + JSON.stringify(err))
+            
         });
 
         producer.on('delivery-report', function (err, report) {
@@ -67,6 +73,7 @@ exports.publishShipmentPicked = function (payload) {
 
     }).catch(function (exception) {
         logger.error("exception: " + exception);
+        console.log('error in publishing shipment picked event ' + JSON.stringify(exception))
     });
 
 };

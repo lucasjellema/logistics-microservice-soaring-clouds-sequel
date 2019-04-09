@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.14"
+var APP_VERSION = "0.0.15"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -193,6 +193,31 @@ shipping.registerAPIs = function (app) {
         })
     });
 
+    app.post('/shipping/updateShippingStatusForOrder/:orderIdentifier', async function (req, res) {
+        var orderIdentifier = req.params['orderIdentifier'];
+        var shippingUpdate = req.body;
+        //  {"type": "","orderId":"112","shipper":"EdFex","pickupDate":1554797232}
+        //TODO:
+        // FIND shipping for order
+        // shipmentDelivered and shipmentPickedUp
+        // Update shipping with Status and Audit trail entry
+        try {
+            model.retrieveShippingForOrder(orderIdentifier).then((shipping) => {
+
+                shipping.shippingStatus = shippingUpdate.type=="shipmentPickedUp"?"collected picked order for delivery":"delivered";
+                // - extend audit
+                addToAuditTrail(shipping, `update received from external shipper ${shippingUpdate.shipper}`)
+                // save shipping document
+                // TODO send partial document instead of entire shipping
+                model.updateShipping(shipping)
+            })// retrieveShipping    
+        } catch (e) {
+            console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier}`)
+
+        }
+    });//updateShippingStatusForOrder
+
+
     app.post('/shipping/:shippingId/cancel', async function (req, res) {
         var shippingId = req.params['shippingId'];
         var cancelResult = await model.cancelShipping(shippingId);
@@ -231,29 +256,6 @@ shipping.registerAPIs = function (app) {
     }//addToAuditTrail
     
 
-    app.post('/shipping/updateShippingStatusForOrder/:orderIdentifier', async function (req, res) {
-        var orderIdentifier = req.params['orderIdentifier'];
-        var shippingUpdate = req.body;
-        //  {"type": "","orderId":"112","shipper":"EdFex","pickupDate":1554797232}
-        //TODO:
-        // FIND shipping for order
-        // shipmentDelivered and shipmentPickedUp
-        // Update shipping with Status and Audit trail entry
-        try {
-            model.retrieveShippingForOrder(orderIdentifier).then((shipping) => {
-
-                shipping.shippingStatus = shippingUpdate.type=="shipmentPickedUp"?"collected picked order for delivery":"delivered";
-                // - extend audit
-                addToAuditTrail(shipping, `update received from external shipper ${shippingUpdate.shipper}`)
-                // save shipping document
-                // TODO send partial document instead of entire shipping
-                model.updateShipping(shipping)
-            })// retrieveShipping    
-        } catch (e) {
-            console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier}`)
-
-        }
-    });//updateShippingStatusForOrder
 
     app.delete('/shipping/:shippingId', function (req, res) {
         var shippingId = req.params['shippingId'];

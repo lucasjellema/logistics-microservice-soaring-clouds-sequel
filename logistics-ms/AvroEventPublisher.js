@@ -1,5 +1,9 @@
 const KafkaAvro = require('kafka-avro');
-const logger = require('./logger');
+//const logger = require('./logger');
+
+const logger = {debug:function (message){console.log(message)}
+, info: function (message){console.log(message)}
+, error:function (message){console.log(message)} }
 
 var kafkaAvro;
 

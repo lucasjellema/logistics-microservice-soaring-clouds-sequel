@@ -62,17 +62,18 @@ exports.publishShipmentPicked = function (payload) {
         });
 
 
-        var topic = producer.Topic(topicName, {
-            'request.required.acks': 1
-        });
+        // var topic = producer.Topic(topicName, {
+        //     'request.required.acks': 1
+        // });
 
         var key = payload.orderId;
         //var key = 'test_key_from_real_code';
         logger.debug('key: ' + key);
         var partition = -1;
         logger.debug('event: ' + JSON.stringify(payload));
-        producer.produce(topic, partition, payload, key);
-
+        // producer.produce(topic, partition, payload, key);
+        // https://www.npmjs.com/package/kafka-avro
+        producer.produce(topicName, partition, payload, key);
 
 
     }).catch(function (exception) {

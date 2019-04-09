@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.15"
+var APP_VERSION = "0.0.16"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -195,6 +195,7 @@ shipping.registerAPIs = function (app) {
 
     app.post('/shipping/updateShippingStatusForOrder/:orderIdentifier', async function (req, res) {
         var orderIdentifier = req.params['orderIdentifier'];
+        console.log(`Logistics MS - Update of Shipping Status for Order : ${orderIdentifier}`)
         var shippingUpdate = req.body;
         //  {"type": "","orderId":"112","shipper":"EdFex","pickupDate":1554797232}
         //TODO:
@@ -203,16 +204,24 @@ shipping.registerAPIs = function (app) {
         // Update shipping with Status and Audit trail entry
         try {
             model.retrieveShippingForOrder(orderIdentifier).then((shipping) => {
+                console.log(`returned from retrieve shipping with ${shipping}`)
+                res.send(202);
 
                 shipping.shippingStatus = shippingUpdate.type=="shipmentPickedUp"?"collected picked order for delivery":"delivered";
                 // - extend audit
                 addToAuditTrail(shipping, `update received from external shipper ${shippingUpdate.shipper}`)
                 // save shipping document
                 // TODO send partial document instead of entire shipping
+                console.log(`Logistics MS - go update shipping document to : ${shipping}`)
                 model.updateShipping(shipping)
             })// retrieveShipping    
         } catch (e) {
-            console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier}`)
+            console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier} because of ${e}`)
+            
+            var status = { "error": JSON.stringify(e) };
+            res.setHeader('Content-Type', 'application/json');
+            res.status(400);
+            res.send(status);
 
         }
     });//updateShippingStatusForOrder

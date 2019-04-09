@@ -13,6 +13,9 @@ var kafkaRegistryVar = process.env.SCHEMA_REGISTRY || 'http://130.61.35.61:8081'
 //topics as they are defined on Kafka
 const SHIPMENT_PICKED_TOPIC = process.env.KAFKA_SHIPMENT_PICKED_TOPIC || 'soaring-orderpicked';
 
+var APP_VERSION = "0.0.3"
+var APP_NAME = "AvroEventPublisher"
+console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 
 exports.initKafkaAvro = function () {
     console.log("initKafkaAvro")

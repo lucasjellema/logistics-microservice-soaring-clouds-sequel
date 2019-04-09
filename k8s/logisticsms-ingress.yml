@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: soaring-logisticsms-ingress
+  namespace: soaring-clouds
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.rule.type: PathPrefixStrip
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /soaring/logistics
+        backend:
+          serviceName: soaring-logistics-ms
+          servicePort: api
+      - path: /soaring/reloadlogistics
+        backend:
+          serviceName: soaring-logistics-ms
+          servicePort: reloader

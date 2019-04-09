@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: soaring-logistics-ms
+  namespace: soaring-clouds
+  labels:
+    k8s-app: soaring-logistics-ms
+    kubernetes.io/name: "soaring-logistics-ms"
+spec:
+  ports:
+  - name: api
+    port: 8400
+    protocol: TCP
+    targetPort: api
+  - name: reloader
+    port: 4600
+    protocol: TCP
+    targetPort: reload
+  type: NodePort
+  selector:
+    k8s-app: soaring-logistics-ms

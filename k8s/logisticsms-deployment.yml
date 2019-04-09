@@ -1,0 +1,60 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: soaring-logistics-ms-deployment
+  namespace: soaring-clouds
+  labels:
+    k8s-app: soaring-logistics-ms
+    version: v2
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: soaring-logistics-ms
+        version: v2
+    spec:
+     # DNS is not working correctly from within OKE - hence all external hosts are identified as hostAliases with the IP address returned by pinging the host
+     hostAliases:
+     - ip: "192.30.253.113"
+       hostnames:
+        - "github.com"
+     - ip: "130.117.76.9"
+       hostnames:
+        - "nominatim.openstreetmap.org"
+     - ip: "169.46.82.169"
+       hostnames:
+        - "logs2.papertrailapp.com"
+     containers:
+     - name: soaring-logistics-ms
+       image: lucasjellema/soaring-logistics-ms:1.0
+       imagePullPolicy: Always
+       resources:
+         # keep request = limit to keep this container in guaranteed class
+         limits:
+           cpu: 100m
+         requests:
+           cpu: 100m
+       env:
+         - name: "GITHUB_URL"
+           value: "https://github.com/lucasjellema/logistics-microservice-soaring-clouds-sequel"
+         - name: "APPLICATION_ROOT_DIRECTORY"
+           value: "logistics-ms"
+         - name: "APP_PORT"
+           value: "4388"
+         - name: "ELASTIC_CONNECTOR"
+           value: "http://129.213.11.15/soaring/elastic"
+         - name: "SOARING_SHIPPINGNEWS_TOPIC_NAME"
+           value: "soaring-shippingnews"  
+         - name: "EVENT_HUB_HOST"
+           value: "130.61.35.61"  
+         - name: "SCHEMA_REGISTRY"
+           value: "http://130.61.35.61:8081"
+         - name: "KAFKA_HOST"
+           value: "130.61.35.61"
+       ports:
+       - containerPort: 4388
+         name: api
+         protocol: TCP
+       - containerPort: 4500
+         name: reload
+         protocol: TCP

@@ -28,7 +28,7 @@ stock.registerAPIs = function (app) {
             var productsResult = await model.retrieveProducts();
             res.setHeader('Content-Type', 'application/json');
             console.log("Products " + JSON.stringify(productsResult))
-            // create an array of products - removing all Elasic Search specific properties
+            // create an array of products - removing all Elastic Search specific properties
             var products =
                 productsResult.hits.hits.reduce(function (products, item) {
                     products.push(item._source)

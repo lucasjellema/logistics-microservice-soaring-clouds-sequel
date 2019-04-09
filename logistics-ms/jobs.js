@@ -119,14 +119,15 @@ async function pickForShipping(shipping) {
 }//pickForShipping
 
 function handOverToExternalShipper(shipping) {
-    console.log(`Hand over external shipper ${shipping.shipping.shippingCompany} ${shipping.shippingId}`)
+    console.log(`Make available external shipper ${shipping.shipping.shippingCompany} ${shipping.shippingId}`)
     // - set new status
     shipping.shippingStatus = "madeAvailableToExternalShipper";
     // - extend audit
-    addToAuditTrail(shipping, "parcel(s) made available to external shipper ${shipping.shipping.shippingCompany}")
+    addToAuditTrail(shipping, `parcel(s) made available to external shipper ${shipping.shipping.shippingCompany}`)
     // save shipping document
     logisticsModel.updateShipping(shipping)
     // publish event to soaring-orderpicked
+    console.log('Going to publish Shipping Picked event')
     var event = { "orderId": shipping.orderIdentifier, "date": { "int": Math.floor(Date.now() / 1000) } }
     avroEventBusPublisher.publishShipmentPicked(event)
     console.log('Shipping Picked was published')

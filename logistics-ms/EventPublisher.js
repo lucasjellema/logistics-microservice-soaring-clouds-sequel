@@ -13,8 +13,8 @@ var APP_NAME = "EventBusPublisher"
 
 // from the Oracle Event Hub - Platform Cluster Connect Descriptor
 
-var topicName = process.env.SOARING_SHIPPINGNEWS_TOPIC_NAME||"a516817-soaring-shipping-news";
-var EVENT_HUB_PUBLIC_IP = process.env.EVENT_HUB_HOST || '129.150.77.116';
+var topicName = process.env.SOARING_SHIPPINGNEWS_TOPIC_NAME||"soaring-shippingnews";
+var EVENT_HUB_PUBLIC_IP = process.env.EVENT_HUB_HOST || '130.61.35.61';
 
 // from the Oracle Event Hub - Platform Cluster Connect Descriptor
 var kafkaConnectDescriptor = EVENT_HUB_PUBLIC_IP;
@@ -23,7 +23,7 @@ console.log("Running Module " + APP_NAME + " version " + APP_VERSION);
 
 function initializeKafkaProducer(attempt) {
     try {
-  
+      
   
       console.log(`Try to initialize Kafka Client at ${kafkaConnectDescriptor} and Producer, attempt ${attempt}`);
       client = new kafka.Client(kafkaConnectDescriptor);

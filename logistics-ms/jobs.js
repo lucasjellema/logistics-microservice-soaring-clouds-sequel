@@ -3,13 +3,14 @@ var logisticsModel = require("./model/model");
 var util = require("./util");
 
 var eventBusPublisher = require("./EventPublisher.js");
+var avroEventBusPublisher = require("./AvroEventPublisher.js");
 const Nominatim = require('nominatim-geocoder')
 const geocoder = new Nominatim({}, {
     format: 'json',
     limit: 3
 })
 
-var APP_VERSION = "0.0.15"
+var APP_VERSION = "0.0.16"
 var APP_NAME = "Logistics Background Jobs"
 
 var jobs = module.exports;
@@ -35,16 +36,16 @@ jobs.runShippingJob = function () {
         openShippings.forEach(function (hit) {
             var shipping = hit._source
             shipping.doc_id = hit._id
-            executionRatio= baseExecutionRatio
+            executionRatio = baseExecutionRatio
 
             // decrease executionRatio depending on
             // - item count (odd * 0.5, 13 * 0.1)
-            var totalItemCount = shipping.items.reduce(function sum(total, item){return total+ item.itemCount},0)  
-            if (Math.abs(totalItemCount % 2) == 1 ) executionRatio = executionRatio * 0.5
-            if (totalItemCount  == 13 ) executionRatio = executionRatio * 0.1
+            var totalItemCount = shipping.items.reduce(function sum(total, item) { return total + item.itemCount }, 0)
+            if (Math.abs(totalItemCount % 2) == 1) executionRatio = executionRatio * 0.5
+            if (totalItemCount == 13) executionRatio = executionRatio * 0.1
             // - destination (country nl *1.5, us * 0.2)
-            executionRatio = executionRatio* (['nl','au'].includes(shipping.destination.country) ? 1.5 :  (['ch','us'].includes(shipping.destination.country)? 0.2:1 ))
-            
+            executionRatio = executionRatio * (['nl', 'au'].includes(shipping.destination.country) ? 1.5 : (['ch', 'us'].includes(shipping.destination.country) ? 0.2 : 1))
+
             // in executionRatio
             if (Math.random() < executionRatio) {
                 if (["lost", "new"].includes(shipping.shippingStatus) || !shipping.shippingStatus) {
@@ -54,7 +55,11 @@ jobs.runShippingJob = function () {
                 }
                 if ("picked" == shipping.shippingStatus) {
                     try {
-                        handOverShipping(shipping)
+                        if (shipping.shippingMethod == 'MARKETPLACE') {
+                            handOverToExternalShipper(shipping)
+                        } else {
+                            handOverShipping(shipping)
+                        }
                     } catch (e) { console.error("error in handover to parcel service " + JSON.stringify(e)) }
                 }
                 if (["handedOverToParcelDelivery", "enRoute", "inDepot"].includes(shipping.shippingStatus)) {
@@ -88,8 +93,8 @@ async function pickForShipping(shipping) {
 
     console.log("Pick for shipping " + shipping.shippingId)
     // do stuff, then update shipping
-//    var result = await logisticsModel.retrieveProductStock(["42371XX", "XCZ", "XCSSSSZ"])
-//TODO deal with case where stock is not enough to pick!
+    //    var result = await logisticsModel.retrieveProductStock(["42371XX", "XCZ", "XCSSSSZ"])
+    //TODO deal with case where stock is not enough to pick!
     shipping.items.forEach(function (item) {
         logisticsModel.saveProductStockTransaction(
             {
@@ -111,6 +116,20 @@ async function pickForShipping(shipping) {
     eventBusPublisher.publishShippingEvent(shipping)
 
 }//pickForShipping
+
+function handOverToExternalShipper(shipping) {
+    console.log(`Hand over external shipper ${shipping.shipping.shippingCompany} ${shipping.shippingId}`)
+    // - set new status
+    shipping.shippingStatus = "madeAvailableToExternalShipper";
+    // - extend audit
+    addToAuditTrail(shipping, "parcel(s) made available to external shipper ${shipping.shipping.shippingCompany}")
+    // save shipping document
+    logisticsModel.updateShipping(shipping)
+    // publish event to soaring-orderpicked
+    var event = { "orderId": shipping.orderIdentifier, "date": { "int": new Date().getTime() } }
+    avroEventBusPublisher.publishShipmentPicked(event)
+    console.log('Shipping Picked was published')
+}// handOverToExternalShipper
 
 
 function handOverShipping(shipping) {
@@ -346,41 +365,41 @@ function calculateShippingCosts(shipping) {
     }
     return costs;
 }//calculateShippingCosts
-    // http://www.nationsonline.org/oneworld/country_code_list.htm
-    var supportedDestinations = ['nl', 'us', 'uk','gb', 'de', 'po', 'pr', 'ni', 'ma', 'au','sg', 'ch', 'in','pt','za','it','ar']
+// http://www.nationsonline.org/oneworld/country_code_list.htm
+var supportedDestinations = ['nl', 'us', 'uk', 'gb', 'de', 'po', 'pr', 'ni', 'ma', 'au', 'sg', 'ch', 'in', 'pt', 'za', 'it', 'ar']
 
-    var validateShipping = async function (shipping) {
-        var validation = {
-            "status": "OK"
-            , "validationFindings": []
-        };
-        var productIdentifiers = shipping.items.reduce(function (ids, item) {
-            ids.push(item.productIdentifier)
-            return ids
-        }
-            , [])
-        var stocks = await logisticsModel.retrieveProductStock(productIdentifiers)
-        console.log(JSON.stringify(stocks))
-        shipping.items.forEach(function (item) {
-            if (!stocks[item.productIdentifier] || stocks[item.productIdentifier] < item.itemCount) {
-                validation.status = "NOK";
-                validation.validationFindings.push({
-                    "findingType": "outOfStockItem",
-                    "offendingItem": item
-                })
-            }
-        })
-
-        if (!supportedDestinations.includes(shipping.destination.country.toLowerCase())) {
+var validateShipping = async function (shipping) {
+    var validation = {
+        "status": "OK"
+        , "validationFindings": []
+    };
+    var productIdentifiers = shipping.items.reduce(function (ids, item) {
+        ids.push(item.productIdentifier)
+        return ids
+    }
+        , [])
+    var stocks = await logisticsModel.retrieveProductStock(productIdentifiers)
+    console.log(JSON.stringify(stocks))
+    shipping.items.forEach(function (item) {
+        if (!stocks[item.productIdentifier] || stocks[item.productIdentifier] < item.itemCount) {
             validation.status = "NOK";
             validation.validationFindings.push({
-                "findingType": "invalidDestination"
+                "findingType": "outOfStockItem",
+                "offendingItem": item
             })
         }
-        validation.shippingCosts = calculateShippingCosts(shipping)
+    })
 
-        return validation;
-    }//validateShipping
+    if (!supportedDestinations.includes(shipping.destination.country.toLowerCase())) {
+        validation.status = "NOK";
+        validation.validationFindings.push({
+            "findingType": "invalidDestination"
+        })
+    }
+    validation.shippingCosts = calculateShippingCosts(shipping)
+
+    return validation;
+}//validateShipping
 
 
 
@@ -423,22 +442,22 @@ async function processShipping(shipping) {
 
 }//processShipping
 
-var firstNames = ['John', 'George', 'Mia', 'Maria', 'Wanda', 'Rose', 'Mary', 'Jacky', 'Melinda', 'Carl','Lonneke', 'Luis','Sven','Jose','Willem','Sandrijn', 'Jan', 'José', 'Alonso', 'Luis']
-var lastNames = ['Brown', 'Böhmer', 'Jansen', 'Velasquez', 'Rosario', 'Miller', 'Perot', 'Strauss', 'Gates', 'Tromp', 'Bizet', 'Wagner', 'Dorel','Kress','Vlek','Kemp']
+var firstNames = ['John', 'George', 'Mia', 'Maria', 'Wanda', 'Rose', 'Mary', 'Jacky', 'Melinda', 'Carl', 'Lonneke', 'Luis', 'Sven', 'Jose', 'Willem', 'Sandrijn', 'Jan', 'José', 'Alonso', 'Luis']
+var lastNames = ['Brown', 'Böhmer', 'Jansen', 'Velasquez', 'Rosario', 'Miller', 'Perot', 'Strauss', 'Gates', 'Tromp', 'Bizet', 'Wagner', 'Dorel', 'Kress', 'Vlek', 'Kemp']
 var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl", "city": "Zoetermeer" }, { "country": "gb", "city": "Manchester" }, { "country": "nl", "city": "Groningen" }
-, { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
-, { "country": "ch", "city": "Geneva" }, { "country": "gb", "city": "London" }
-, { "country": "de", "city": "Dortmund" }, { "country": "pt", "city": "Porto" }
-, { "country": "de", "city": "München" }, { "country": "in", "city": "Hyderabad" }
-, { "country": "us", "city": "San Francisco" }, { "country": "in", "city": "Mumbai" }
-, { "country": "us", "city": "Austin" }, { "country": "us", "city": "Seattle" }
-, { "country": "us", "city": "Chicago" }, { "country": "us", "city": "Savannah" }
-, { "country": "us", "city": "New York" }, { "country": "ch", "city": "Montreux" }
-, { "country": "nl", "city": "Amsterdam" }, { "country": "gb", "city": "Bristol" }
-, { "country": "za", "city": "Cape Town" }, { "country": "it", "city": "Pisa" }
-, { "country": "za", "city": "Pretoria" }, { "country": "it", "city": "Messina" }
-, { "country": "za", "city": "Durban" }, { "country": "it", "city": "Bergamo" }
-, { "country": "ar", "city": "Buenos Aires" }, { "country": "it", "city": "Napoli" }
+    , { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
+    , { "country": "ch", "city": "Geneva" }, { "country": "gb", "city": "London" }
+    , { "country": "de", "city": "Dortmund" }, { "country": "pt", "city": "Porto" }
+    , { "country": "de", "city": "München" }, { "country": "in", "city": "Hyderabad" }
+    , { "country": "us", "city": "San Francisco" }, { "country": "in", "city": "Mumbai" }
+    , { "country": "us", "city": "Austin" }, { "country": "us", "city": "Seattle" }
+    , { "country": "us", "city": "Chicago" }, { "country": "us", "city": "Savannah" }
+    , { "country": "us", "city": "New York" }, { "country": "ch", "city": "Montreux" }
+    , { "country": "nl", "city": "Amsterdam" }, { "country": "gb", "city": "Bristol" }
+    , { "country": "za", "city": "Cape Town" }, { "country": "it", "city": "Pisa" }
+    , { "country": "za", "city": "Pretoria" }, { "country": "it", "city": "Messina" }
+    , { "country": "za", "city": "Durban" }, { "country": "it", "city": "Bergamo" }
+    , { "country": "ar", "city": "Buenos Aires" }, { "country": "it", "city": "Napoli" }
 ]
 
 jobs.runShippingGenerationJob = async function () {
@@ -484,5 +503,6 @@ function scheduleShippingGenerationJob() {
     setTimeout(jobs.runShippingGenerationJob, delay);
 }//scheduleShippingGenerationJob
 
-//jobs.runShippingGenerationJob()
+// TODO this is now down from a standalone Function
+// jobs.runShippingGenerationJob()
 

@@ -423,8 +423,8 @@ async function processShipping(shipping) {
 
 }//processShipping
 
-var firstNames = ['John', 'George', 'Mia', 'Maria', 'Wanda', 'Rose', 'Mary', 'Jacky', 'Melinda', 'Carl', 'Jan', 'José', 'Alonso', 'Luis']
-var lastNames = ['Brown', 'Böhmer', 'Jansen', 'Velasquez', 'Rosario', 'Miller', 'Perot', 'Strauss', 'Gates', 'Tromp', 'Bizet', 'Wagner', 'Dorel']
+var firstNames = ['John', 'George', 'Mia', 'Maria', 'Wanda', 'Rose', 'Mary', 'Jacky', 'Melinda', 'Carl','Lonneke', 'Luis','Sven','Jose','Willem','Sandrijn', 'Jan', 'José', 'Alonso', 'Luis']
+var lastNames = ['Brown', 'Böhmer', 'Jansen', 'Velasquez', 'Rosario', 'Miller', 'Perot', 'Strauss', 'Gates', 'Tromp', 'Bizet', 'Wagner', 'Dorel','Kress','Vlek','Kemp']
 var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl", "city": "Zoetermeer" }, { "country": "gb", "city": "Manchester" }, { "country": "nl", "city": "Groningen" }
 , { "country": "ch", "city": "Bern" }, { "country": "pt", "city": "Lisbon" }
 , { "country": "ch", "city": "Geneva" }, { "country": "gb", "city": "London" }
@@ -436,6 +436,8 @@ var destinations = [{ "country": "de", "city": "Frankfurt" }, { "country": "nl",
 , { "country": "us", "city": "New York" }, { "country": "ch", "city": "Montreux" }
 , { "country": "nl", "city": "Amsterdam" }, { "country": "gb", "city": "Bristol" }
 , { "country": "za", "city": "Cape Town" }, { "country": "it", "city": "Pisa" }
+, { "country": "za", "city": "Pretoria" }, { "country": "it", "city": "Messina" }
+, { "country": "za", "city": "Durban" }, { "country": "it", "city": "Bergamo" }
 , { "country": "ar", "city": "Buenos Aires" }, { "country": "it", "city": "Napoli" }
 ]
 

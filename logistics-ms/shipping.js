@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.16"
+var APP_VERSION = "0.0.17"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -204,7 +204,7 @@ shipping.registerAPIs = function (app) {
         // Update shipping with Status and Audit trail entry
         try {
             model.retrieveShippingForOrder(orderIdentifier).then((shipping) => {
-                console.log(`returned from retrieve shipping with ${shipping}`)
+                console.log(`returned from retrieve shipping with ${JSON.stringify(shipping)}`)
                 res.send(202);
 
                 shipping.shippingStatus = shippingUpdate.type=="shipmentPickedUp"?"collected picked order for delivery":"delivered";
@@ -212,11 +212,11 @@ shipping.registerAPIs = function (app) {
                 addToAuditTrail(shipping, `update received from external shipper ${shippingUpdate.shipper}`)
                 // save shipping document
                 // TODO send partial document instead of entire shipping
-                console.log(`Logistics MS - go update shipping document to : ${shipping}`)
+                console.log(`Logistics MS - go update shipping document to : ${JSON.stringify(shipping)}`)
                 model.updateShipping(shipping)
             })// retrieveShipping    
         } catch (e) {
-            console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier} because of ${e}`)
+            console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier} because of ${JSON.stringify(e)}`)
             
             var status = { "error": JSON.stringify(e) };
             res.setHeader('Content-Type', 'application/json');

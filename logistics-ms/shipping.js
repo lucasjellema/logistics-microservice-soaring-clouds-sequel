@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.17"
+var APP_VERSION = "0.0.18"
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -203,11 +203,16 @@ shipping.registerAPIs = function (app) {
         // shipmentDelivered and shipmentPickedUp
         // Update shipping with Status and Audit trail entry
         try {
-            model.retrieveShippingForOrder(orderIdentifier).then((shipping) => {
-                console.log(`returned from retrieve shipping with ${JSON.stringify(shipping)}`)
-                res.send(202);
+            model.retrieveShippingForOrder(orderIdentifier).then((result) => {
+                console.log(`returned from retrieve shipping with ${JSON.stringify(result)}`)
+                if (result.hits.total == 0) // not found the shipping record
+                {
+                    res.send(404);
 
-                shipping.shippingStatus = shippingUpdate.type=="shipmentPickedUp"?"collected picked order for delivery":"delivered";
+                } else
+                    res.send(202);
+                var shipping = result.hits.hits[0]
+                shipping.shippingStatus = shippingUpdate.type == "shipmentPickedUp" ? "collected picked order for delivery" : "delivered";
                 // - extend audit
                 addToAuditTrail(shipping, `update received from external shipper ${shippingUpdate.shipper}`)
                 // save shipping document
@@ -217,7 +222,7 @@ shipping.registerAPIs = function (app) {
             })// retrieveShipping    
         } catch (e) {
             console.log(`Failed to handle Shipping Update for Order : ${orderIdentifier} because of ${JSON.stringify(e)}`)
-            
+
             var status = { "error": JSON.stringify(e) };
             res.setHeader('Content-Type', 'application/json');
             res.status(400);
@@ -261,9 +266,9 @@ shipping.registerAPIs = function (app) {
             , "status": shipping.shippingStatus
             , "comment": comment
         })
-    
+
     }//addToAuditTrail
-    
+
 
 
     app.delete('/shipping/:shippingId', function (req, res) {

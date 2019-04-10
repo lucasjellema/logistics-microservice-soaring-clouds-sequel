@@ -9,7 +9,7 @@ var util = require("./util");
 var model = require("./model/model");
 var eventBusPublisher = require("./EventPublisher.js");
 
-var APP_VERSION = "0.0.19"
+var APP_VERSION = "0.0.20" 
 var APP_NAME = "Shipping"
 
 var shipping = module.exports;
@@ -141,6 +141,13 @@ shipping.registerAPIs = function (app) {
         })
     });
 
+
+//    Result: {"took":0,"timed_out":false,"_shards":{"total":5,"successful":5,"skipped":0,"failed":0}
+//,"hits":{"total":1,"max_score":4.3985558
+//,"hits":[{"_index":"shipping","_type":"doc","_id":"4401473f-7656-074f-48c0-5ea1c40ac7a6","_score":4.3985558
+//,"_source":{"orderIdentifier":"fdnn0skxs","nameAddressee":"Marieke van Nimwegen","destination":{"city":"Nijmegen","country":"nl","coordinates":{"lat":"51.84257485","lon":"5.83896062874823"}},"shippingMethod":"MARKETPLACE","shipping":{"shippingMethod":"MARKETPLACE","shippingCompany":"Edfex","shippingId":"1"},"giftWrapping":false,"personalMessage":false
+//,"items":[{"productIdentifier":"8f498e2e-21e6-11e8-b467-0ed5f89f718b","itemCount":10}],"shippingId":"4401473f-7656-074f-48c0-5ea1c40ac7a6","shippingStatus":"madeAvailableToExternalShipper"
+// ,"auditTrail":[{"comment":"creation of new shipping","timestamp":"2019-4-10T8:9:27","status":"new"},{"comment":"order items picked for shipping","timestamp":"2019-4-10T8:12:53","status":"picked"},{"comment":"parcel(s) made available to external shipper Edfex","timestamp":"2019-4-10T8:12:53","status":"madeAvailableToExternalShipper"}],"shippingCosts":4.5,"submissionDate":"2019-4-10T8:9:27","doc_id":"4401473f-7656-074f-48c0-5ea1c40ac7a6"}}]}}
     app.get('/shippingUI/forOrder/:orderIdentifier', function (req, res) {
         var orderIdentifier = req.params['orderIdentifier'];
         model.retrieveShippingForOrder(orderIdentifier).then((result) => {
@@ -189,6 +196,7 @@ shipping.registerAPIs = function (app) {
 
             res.send(html);
         }).catch(function (e) {
+            console.log(`failed to return HTML from /shippingUI/forOrder/ because of ${JSON.stringify(e)}`)
             res.send(404);
         })
     });

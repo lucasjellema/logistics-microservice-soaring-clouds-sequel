@@ -159,8 +159,10 @@ shipping.registerAPIs = function (app) {
                 auditTrail = auditTrail.concat(`<li><b><i>${entry.status}</i></b> (time: ${entry.timestamp.substr(entry.timestamp.indexOf('T') + 1)})</li>`)
             })
             auditTrail = auditTrail.concat('</ol>')
-
-            var parcels = `Number of parcels ${shipping.parcels.length}<br/ >`
+            console.log(`Audit trail ${auditTrail}`)
+            var parcels 
+            if (shipping.parcels && shipping.parcels.length>0) {
+            parcels = `Number of parcels ${shipping.parcels.length}<br/ >`
             shipping.parcels.forEach(function (parcel, index) {
                 parcels = parcels.concat(`${index + 1} - Track and Trace Identifier: ${parcel.trackAndTraceIdentifier}`)
                 parcels = parcels.concat('<ol>')
@@ -169,6 +171,8 @@ shipping.registerAPIs = function (app) {
                 })
                 parcels = parcels.concat('</ol>')
             })
+            }
+            console.log(`Parcels parcels${parcels}`)
             var html = `<html>
             <head>
               <title>Soaring - Shipping Details for Order</title>
